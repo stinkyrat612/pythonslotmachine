@@ -1,3 +1,4 @@
+# Create a starter savefile for testing, can be done via game menu:
 with open("slot_machine/savefile.txt", "w") as savefile:
     savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0")
 
