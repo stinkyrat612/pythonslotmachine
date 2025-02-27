@@ -6,6 +6,8 @@ import msvcrt
 import time
 import os
 
+from debug import *
+
 # hi, thanks for looking onto my project
 # I love making slightly advanced stuff out of pure garbage and silly ideas
 # 33% percent of the project's been pure math, yet it might appear still unbalanced.
@@ -100,7 +102,7 @@ madness_odds_upgrades = {
 
 
 # GENERAL VARIABLES: (don't touch)
-user_balance = 0.00
+user_balance = 100.00
 running = True
 slot_contents = ["🍪", "🍇", "🍄", "🍒", "🍍"]
 game_mode = "easy" # easy / quadruple / madness
@@ -260,18 +262,6 @@ gi_costs = {
     10 : 315.00
 }
 
-
-
-def DEBUG_ADDCASH():
-    # I only slide this function in for testing, don't abuse please.
-    global user_balance
-    user_balance += 1000
-
-
-def DEBUG_VARIABLEDUMP():
-    globals_dump = globals()
-    for var_name, value in globals_dump.items():
-        print(f"{var_name}: {value}")
 
 
 def show_balance(**kwargs):
@@ -441,7 +431,7 @@ def client_settings():
 
 def overwrite_savefile_with_default_data():
 
-    with open("slot_machine/savefile.txt", "w") as savefile:
+    with open("savefile.txt", "w") as savefile:
         savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0")
         savefile.close()
 
@@ -467,7 +457,7 @@ def save_data_to_savefile():
 
     global owns_autofarm
 
-    savefile = open("slot_machine/savefile.txt", "w")
+    savefile = open("savefile.txt", "w")
 
     # Handle emoji writing to .txt:
     match pref_removed_slot1:
@@ -482,7 +472,7 @@ def save_data_to_savefile():
         case "🍄":
             prefslot1_tosave = "5"
         case _:
-            print("Savedata prefemoji1 variable corrupted, cannot save.")
+            print("Savedata's prefemoji1 variable corrupted, cannot save.")
     
     match pref_removed_slot2:
         case "🍇":
@@ -496,7 +486,7 @@ def save_data_to_savefile():
         case "🍄":
             prefslot2_tosave = "5"
         case _:
-            print("Savedata prefemoji2 variable corrupted, cannot save.")
+            print("Savedata's prefemoji2 variable corrupted, cannot save.")
 
     if owns_autofarm == True:
         autofarm_tosave = "1"
@@ -540,7 +530,7 @@ def read_data_from_savefile():
 
     global owns_autofarm
 
-    with open("slot_machine/savefile.txt", "r") as savefile:
+    with open("savefile.txt", "r") as savefile:
 
         line_values = savefile.readlines()
 
@@ -773,7 +763,7 @@ def display_upgrade_shop():
                     continue
         # Loss Stop Decrease (LSD):
         if str_input == "2":
-            if am_upgrade_level == 10:
+            if loss_step_level == 10:
                 print("❎ Your 'Loss Stop Decrease' has already been maxed!\n\tPress any key to return.")
                 str_input = input()
                 return
@@ -805,7 +795,7 @@ def display_upgrade_shop():
                     continue
         # General Interval Decrease (GID):
         if str_input == "3":
-            if am_upgrade_level == 10:
+            if general_interval_level == 10:
                 print("❎ Your 'General Interval Decrease' has already been maxed!\n\tPress any key to return.")
                 str_input = input()
                 return
@@ -850,12 +840,13 @@ def display_upgrade_shop():
             while True:
 
                 if str_input == "1":
-                    if am_upgrade_level <= 1:
+                    if easy_odds_upgrade_level == 2:
                         print("❎ Your 'EASY Odds Upgrade' has already been maxed!\n\tPress any key to return.")
                         str_input = input()
                         return
                     else:
                         if user_balance >= easy_odds_upgrades.get(easy_odds_upgrade_level+1):
+                            user_balance -= easy_odds_upgrades.get(easy_odds_upgrade_level+1)
                             easy_odds_upgrade_level += 1
                             print("Upgraded! 🔥")
                             time.sleep(1.3)
@@ -865,6 +856,7 @@ def display_upgrade_shop():
                                 str_input = input()
                                 if str_input.upper() == "Y":
                                     save_data_to_savefile()
+                                    return
                                 elif str_input.upper() == "N":
                                     return
                                 else:
@@ -876,12 +868,13 @@ def display_upgrade_shop():
                             time.sleep(1.5)
                             return              
                 elif str_input == "2":
-                    if am_upgrade_level <= 1:
+                    if quadruple_odds_upgrade_level == 2:
                         print("❎ Your 'QUADRUPLE Odds Upgrade' has already been maxed!\n\tPress any key to return.")
                         str_input = input()
                         return
                     else:
                         if user_balance >= quadruple_odds_upgrades.get(quadruple_odds_upgrade_level+1):
+                            user_balance -= quadruple_odds_upgrades.get(easy_odds_upgrade_level+1)
                             quadruple_odds_upgrade_level += 1
                             print("Upgraded! 🔥🔥")
                             while True:
@@ -896,19 +889,18 @@ def display_upgrade_shop():
                                     print("Please pick a valid option.")
                                     time.sleep(1.5)
                                     continue
-                            time.sleep(1.3)
-                            return
                         else:
                             print("❌ Not enough money!")
                             time.sleep(1.5)
                             return
                 elif str_input == "3":
-                    if am_upgrade_level <= 1:
+                    if madness_odds_upgrade_level == 2:
                         print("❎ Your 'MADNESS Odds Upgrade' has already been maxed!\n\tPress any key to return.")
                         str_input = input()
                         return
                     else:
                         if user_balance >= madness_odds_upgrades.get(madness_odds_upgrade_level+1):
+                            user_balance -= madness_odds_upgrades.get(madness_odds_upgrade_level+1)
                             madness_odds_upgrade_level += 1
                             print("Upgraded! 🔥🔥🔥")
                             time.sleep(1.3)
@@ -1022,7 +1014,7 @@ def change_game_settings():
 
     while True:
         os.system("cls")
-        print("💖 Python Slot Machine Settings 🏆\n\n\t⭐ [1] -- Set gamemode\n\t⚡ [2] -- Autofarm\n\n")
+        print("💖 Python Slot Machine Settings 🏆\n\n\t⭐ [1] -- Set gamemode\n\t⚡ [2] -- Autofarm\n\t⏪ [3] -- Return")
         str_input = input()
         if str_input.upper() == "1":
             os.system("cls")
@@ -1077,6 +1069,14 @@ def change_game_settings():
                     print(f"❌ You don't own an autofarm yet! You can purchse one in the Upgrade Shop!")
                     time.sleep(3.0)
                     return
+        elif str_input.upper() == "3":
+            return
+        else:
+            print("❌ Invalid input.\n\n")
+            time.sleep(0.75)
+            os.system("cls")
+            continue
+
     return
 
 
@@ -1108,6 +1108,7 @@ def spin():
 
     global owns_autofarm
     global autofarm_on
+
 
     def get_user_input_with_timeout(timeout=0.75):
         print("\n>>> ", end='', flush=True)  # Prompt for input
@@ -1170,7 +1171,7 @@ def spin():
             slot_rolled.append(ran.choice(slot_contents))
 
         # Print out rolled elements:
-        print("|", end="")
+        print(" |", end="")
         for x in range(slot_range):
             print(f"{slot_rolled[x]} | ", end="")
         print("\n")
@@ -1370,7 +1371,7 @@ def main():
 if __name__ == "__main__":
     try:
         # Just check if such a file can be opened, I don't know what I've written here to be fair:
-        with open("slot_machine/savefile.txt") as savefile:
+        with open("savefile.txt") as savefile:
             savefile.close()
             pass
 
