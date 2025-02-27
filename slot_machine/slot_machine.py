@@ -19,8 +19,11 @@ from debug import *
 #   i love and i hate my wife, can somebody hire me ill be a good boy
 
 # YET TO IMPLEMENT:
-#   maybe add debuffs? It's not hard to sum up cash for autofarm, 5 levels of each upgrades and decrease cash reward for easy difficulty.
-#   i feel like this game's so farmable it's insane
+#   maybe add debuffs? It's not hard to sum up cash for autofarm, 5 levels of each upgrades and decrease cash reward for easy difficulty;
+#   i feel like this game's so farmable it's insane;
+#   twist up the price ranges, game feels kinda stuck in between $100.00 and $5,000.00, honestly kinda boring;
+#   maybe add a switch bind option for the Y/N prompts, make the user have the ability to pick different keys.
+#   FIX THE FUCKING PRESTIGE PRICES MAN, AUTOFARM $2500 WHILE PRESTIGE 1 $2000 LMAO
 
 
 
@@ -716,7 +719,8 @@ def display_upgrade_shop():
 
         os.system("cls")
 
-        print(f"⭐ UPGRADES ⭐\n\n", end="")
+        print(f"⭐ UPGRADES ⭐")
+        print(f"${user_balance:.2f}\n")
         print(f"\t[1] = Raise Additional Win Funds [{am_upgrade_level}] : [+${additional_money_upgrade_value:.2f}] \t💸 -> [${amu_costs.get(am_upgrade_level+1):.2f}] : [+${additional_money_upgrade_value + 2.50:.2f}]\n", end="") if am_upgrade_level <= 19 else print(f"\t[1] = Raise Additional Win Funds [{am_upgrade_level}] : [+${additional_money_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
         #print(f"\t[1] = Raise Additional Win Funds [{am_upgrade_level}] : [+${additional_money_upgrade_value:.2f}] \t💸 -> [${amu_costs.get(am_upgrade_level+1):.2f}] : [+${additional_money_upgrade_value + 2.50:.2f}]\n", end="")
         print(f"\t[2] = Decrease Money Loss [{loss_step_level}] : [{loss_step_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_step_level+1):.2f}] : [{(loss_step_level_factor-0.04)*100:.2f}%]\n", end="") if loss_step_level <= 9 else print(f"\t[2] = Decrease Money Loss [{loss_step_level}] : [{loss_step_level_factor*100:.2f}%] \t\t📉 -> [MAXED] : [MAXED]\n", end="")
@@ -1170,7 +1174,7 @@ def spin():
             slot_rolled.append(ran.choice(slot_contents))
 
         # Print out rolled elements:
-        print(" |", end="")
+        print("| ", end="")
         for x in range(slot_range):
             print(f"{slot_rolled[x]} | ", end="")
         print("\n")
