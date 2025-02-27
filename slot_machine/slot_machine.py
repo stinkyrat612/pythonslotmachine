@@ -153,6 +153,7 @@ prestige_costs = {
 # Autofarms (prestige_level : autofarm_cost):
 autofarm_on = False
 autofarm_costs = {
+    0 : 2500,
     1 : 2750,
     2 : 3000,
     3 : 3250,
@@ -162,7 +163,6 @@ autofarm_costs = {
     7 : 4250,
     8 : 4500,
     9 : 4750,
-    10 : 5000
 }
 
 
@@ -927,12 +927,11 @@ def display_upgrade_shop():
                     time.sleep(1.2)
                     continue
         # Autofarm Ability Upgrade:
-        if str_input == "5": 
+        if str_input == "5":
             if owns_autofarm != True:
                 os.system("cls")
-                autofarm_cost = autofarm_costs.get(user_prestige_level)
-                print(f"💳 Autofarm cost: [${autofarm_cost:.2f}]")
-                if user_balance < autofarm_cost:
+                print(f"💳 Autofarm cost: [${autofarm_costs.get(user_prestige_level)}]")
+                if user_balance < autofarm_costs.get(user_prestige_level):
                     print(f"\n❌ You cannot afford the autofarm. Press any key to continue. ❌")
                     str_input = input()
                     return
@@ -940,7 +939,7 @@ def display_upgrade_shop():
                     while True:
                         str_input = input("Would you like to purchase the Autofarm Ability module? (Y/N): ")
                         if str_input.upper() == "Y":
-                            user_balance -= autofarm_cost
+                            user_balance -= autofarm_costs.get(user_prestige_level)
                             owns_autofarm = True
                             print("\nAutofarm purchased! Congratulations! 🎉🎉")
                             time.sleep(2.0)
