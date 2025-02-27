@@ -491,7 +491,7 @@ def save_data_to_savefile():
     if owns_autofarm == True:
         autofarm_tosave = "1"
     else:
-        autofarm_tosave = "2"
+        autofarm_tosave = "0"
 
 
     savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_step_level}\n{am_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}")
