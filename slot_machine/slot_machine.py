@@ -25,6 +25,14 @@ from debug import *
 #   maybe add a switch bind option for the Y/N prompts, make the user have the ability to pick different keys.
 #   FIX THE FUCKING PRESTIGE PRICES MAN, AUTOFARM $2500 WHILE PRESTIGE 1 $2000 LMAO
 
+# NOTES FROM TESTING:
+#   0.25s interval feels WAY too fast
+#   prices should be higher i think
+#   infinite loop after buying autofarm
+#   quadruple sucks, no gain almost
+#   I upgraded everything, why would I switch to quadruple?
+#   Tutorial Mode, granting the player a few extra bucks for the first upgrade.
+
 
 
 # General cash rewards formulas:
@@ -199,6 +207,7 @@ amu_costs = {
     5 : 100.00,
     6 : 110.00,
     7 : 120.00,
+    8 : 130.00,
     9 : 140.00,
     10 : 150.00,
     11 : 160.00,
@@ -265,6 +274,9 @@ gi_costs = {
     10 : 315.00
 }
 
+
+def begin_tutorial():
+    pass
 
 
 def show_balance(**kwargs):
@@ -714,7 +726,7 @@ def display_upgrade_shop():
     global madness_odds_upgrade_level
 
     global owns_autofarm
-    
+
     while True:
 
         os.system("cls")
@@ -981,7 +993,7 @@ def display_upgrade_shop():
                 print("😍 CONGRATULATIONS! You successfully prestiged! 😎")
                 print(f"You're now prestige {user_prestige_level+1}! ... and gained some bonus cash boosts!")
                 # Reset player data for new game:
-                user_balance = 0
+                user_balance = 100.00
                 easy_times_won = 0
                 quadruple_times_won = 0
                 madness_times_won = 0
@@ -1380,6 +1392,7 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         overwrite_savefile_with_default_data()
+        begin_tutorial()
     
     finally:
         read_data_from_savefile()
