@@ -15,7 +15,7 @@ from debug import *
 
 # YET TO IMPLEMENT:
 #   Tutorial Mode, granting the player a few extra bucks for the first upgrade.
-#   debuffs after certain stages in the game for specific difficulties?
+#   debuffs after certain stages in the game for specific diffic`ulties?
 #   maybe add a switch bind option for the Y/N prompts, make the user have the ability to pick different keys
 
 # NOTES FROM TESTING:
@@ -471,7 +471,7 @@ def client_settings():
 
 def overwrite_savefile_with_default_data():
 
-    with open("savefile.txt", "w") as savefile:
+    with open("slot_machine/savefile.txt", "w") as savefile:
         savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0")
         savefile.close()
 
@@ -497,7 +497,7 @@ def save_data_to_savefile():
 
     global owns_autofarm
 
-    savefile = open("savefile.txt", "w")
+    savefile = open("slot_machine/savefile.txt", "w")
 
     # Handle emoji writing to .txt:
     match pref_removed_slot1:
@@ -570,7 +570,7 @@ def read_data_from_savefile():
 
     global owns_autofarm
 
-    with open("savefile.txt", "r") as savefile:
+    with open("slot_machine/savefile.txt", "r") as savefile:
 
         line_values = savefile.readlines()
 
@@ -1413,7 +1413,7 @@ def main():
 if __name__ == "__main__":
     try:
         # Just check if such a file can be opened, I don't know what I've written here to be fair:
-        with open("savefile.txt") as savefile:
+        with open("slot_machine/savefile.txt") as savefile:
             savefile.close()
             pass
 
