@@ -8,44 +8,35 @@ import os
 
 from debug import *
 
+
 # hi, thanks for looking onto my project
 # I love making slightly advanced stuff out of pure garbage and silly ideas
-# 33% percent of the project's been pure math, yet it might appear still unbalanced.
-# code could've been a little more cleaner, like there's a bunch of repetitive code that I could pack into a function
-# maybe in the future ^^
 
-# DEV NOTES:
-#   lo-fi music is a lie, and so is the cake
-#   i love and i hate my wife, can somebody hire me ill be a good boy
 
 # YET TO IMPLEMENT:
-#   maybe add debuffs? It's not hard to sum up cash for autofarm, 5 levels of each upgrades and decrease cash reward for easy difficulty;
-#   i feel like this game's so farmable it's insane;
-#   twist up the price ranges, game feels kinda stuck in between $100.00 and $5,000.00, honestly kinda boring;
-#   maybe add a switch bind option for the Y/N prompts, make the user have the ability to pick different keys.
-#   FIX THE FUCKING PRESTIGE PRICES MAN, AUTOFARM $2500 WHILE PRESTIGE 1 $2000 LMAO
+#   Tutorial Mode, granting the player a few extra bucks for the first upgrade.
+#   debuffs after certain stages in the game for specific difficulties?
+#   maybe add a switch bind option for the Y/N prompts, make the user have the ability to pick different keys
 
 # NOTES FROM TESTING:
-#   0.25s interval feels WAY too fast
-#   prices should be higher i think
 #   infinite loop after buying autofarm
-#   quadruple sucks, no gain almost
-#   I upgraded everything, why would I switch to quadruple?
-#   Tutorial Mode, granting the player a few extra bucks for the first upgrade.
+
+# NOTES FROM DURING THE ECONOMY REVAMP:
+#   I think loss decrease prices are ridiculous and unworth it.
+#   Make a user object, so it has its own balance and stuff.
 
 
 
 # General cash rewards formulas:
     # Easy:
-    #   4,0% WR
-    #   135.00 * prestige multiplier + additional_money_upgrade + times_won_mulitplier
+    #   4,00% BWR
+    #   (135.00 + (eb_upgrade_amount * difficulty) + (times_won * difficulty)) * prestige_multiplier
     # Quadruple:
-    #   0,8% WR
-    #   295.00 * prestige multiplier + additional_money_upgrade + times_won_mulitplier
+    #   0,80% BWR
+    #   (615.00 + (eb_upgrade_amount * difficulty) + (times_won * difficulty)) * prestige_multiplier
     # Madness:
-    #   0,16% WR
-    #   765.00 * prestige multiplier + additional_money_upgrade + times_won_mulitplier
-# 135.00$ >> 615.00$ >> 2435.00$? <---------- solid base reward concept, maybe try it out sometime?
+    #   0,16% BWR
+    #   (2435.00 + (eb_upgrade_amount * difficulty) + (times_won * difficulty)) * prestige_multiplier
 
 
 
@@ -60,22 +51,20 @@ from debug import *
 #   Rules:  Hit 3 of the same elements, 5 contents => 5^3 = 125, 5/125 = 4.00%  #0
 #           Hit 3 of the same elements, 4 contents => 4^3 = 64, 4/64 = 6.25%    #1
 #           Hit 3 of the same elements, 3 contents => 3^3 = 9, 3/27 = 11.11%    #2
-#           Hit 3 of the same elements, 2 contents => 2^3 = 8, 2/8 = 25.00%     #3 ??
-# that looks fucking ridiculous, 25%?, maybe change the rewards for the games? absurd amounts!! what in the fuck? (i dont know what i've written here, i dont think i actually implemented that buff)
-# 135.00$ >> 615.00$ >> 2435.00$?
-# and then increase prestige prices, last one could got for 200,000.00$ ngl
+#           Hit 3 of the same elements, 2 contents => 2^3 = 8, 2/8 = 25.00%     #3 // Unimplemented, too overpowered.
+# that looks freaking ridiculous, 25%?, maybe change the rewards for the games? absurd amounts!! what in the fuck? (i dont know what i've written here, i dont think i actually implemented that kinda buff)
 
 # Quadruple:
 #   Rules:  Hit 4 of the same elements, 5 contents => 5^4 = 625, 5/625 = 0.8000%
 #           Hit 4 of the same elements, 4 contents => 4^4 = 256, 4/256 = 1.5625%
 #           Hit 4 of the same elements, 3 contents => 3^4 = 81, 3/81 = 3.7037%
-#           Hit 4 of the same elements, 2 contents => 2^4 = 16, 2/16 = 12.5000% // nah.. seems too easy now, endgame and it has to be.
+#           Hit 4 of the same elements, 2 contents => 2^4 = 16, 2/16 = 12.5000% // Unimplemented, too overpowered.
 
 # Madness:
 #   Rules:  Hit 5 of the same elements, 5 contents => 5^5 = 3125, 5/3125 = 0.16%
 #           Hit 5 of the same elements, 4 contents => 4^5 = 1024, 4/1024 = 0.39%
 #           Hit 5 of the same elements, 3 contents => 3^5 = 243, 3/243 = 1.23%
-#           Hit 5 of the same elements, 2 contents => 2^5 = 32, 2/32 = 6.25% // endgame i dont know?
+#           Hit 5 of the same elements, 2 contents => 2^5 = 32, 2/32 = 6.25% // Unimplemented, too overpowered.
 
 
 
@@ -83,36 +72,37 @@ easy_odds_upgrade_level = 0
 quadruple_odds_upgrade_level = 0
 madness_odds_upgrade_level = 0
 easy_odds_display = {
-    0 : 4,
+    0 : 4.00,
     1 : 6.25,
     2 : 11.11
 }
 quadruple_odds_display = {
-    0 : 0.8,
+    0 : 0.80,
     1 : 1.56,
-    2 : 3.7
+    2 : 3.70
 }
 madness_odds_display = {
     0 : 0.16,
     1 : 0.39,
     2 : 1.23
 }
+
 easy_odds_upgrades = {
-    1 : 280.00,
-    2 : 1630.00
+    1 : 3501.00,
+    2 : 75057.00
 }
 quadruple_odds_upgrades = {
-    1 : 890.00,
-    2 : 9780.00
+    1 : 64420.00,
+    2 : 350030.00
 }
 madness_odds_upgrades = {
-    1 : 12530.00,
-    2 : 23950.00
+    1 : 250222.00,
+    2 : 750390.00
 }
 
 
 
-# GENERAL VARIABLES: (don't touch)
+# GENERAL VARIABLES: (do not touch)
 user_balance = 100.00
 running = True
 slot_contents = ["🍪", "🍇", "🍄", "🍒", "🍍"]
@@ -120,7 +110,7 @@ game_mode = "easy" # easy / quadruple / madness
 slot_rolled = []
 slot_range = 3
 display_main_menu = True
-keep_history = False # too lazy to implement or i just won't, VSC terminal is ridiculous when being expanded
+keep_history = False # too lazy to implement or i just won't, VSC terminal is acting ridiculous when being expanded
 KEY_MINIGAME_PRIZE_MONEY = 1.20 # might increase, might decrease based off of the gameplay testing
 pref_removed_slot1 = None
 pref_removed_slot2 = None
@@ -128,35 +118,40 @@ owns_autofarm = False
 
 
 
-# Prestige Multipliers:
-    # #1 - 1.10x money // costing $2,000.00??
-    # #2 - 1.20x money // costing $3,000.00??
+# Prestige Multipliers (+0.30x reward / prestige):
+    # #1 - 1.30x reward
+    # #2 - 1.60x reward
     # ...
-    # #10 = win game condition // hella expensive, maybe even $100,000.00 if the steep goes up too high lel
+    # #9 - 3.70x reward
+    # #10 = win game condition // hella expensive but hella big multiplier for fun.
 user_prestige_level = 0
 prestige_multipliers = {
     0 : 1.00,
-    1 : 1.10,
-    2 : 1.20,
-    3 : 1.30,
-    4 : 1.40,
-    5 : 1.50,
-    6 : 1.60,
-    7 : 1.70,
-    8 : 1.80,
-    9 : 1.90
+    1 : 1.30,
+    2 : 1.60,
+    3 : 1.90,
+    4 : 2.20,
+    5 : 2.50,
+    6 : 2.80,
+    7 : 3.10,
+    8 : 3.40,
+    9 : 3.70,
+    10: 11.00
 }
 prestige_costs = {
-    1 : 2000,
-    2 : 3000,
-    3 : 4500,
-    4 : 6500,
-    5 : 9500,
-    6 : 13500,
-    7 : 19500,
-    8 : 27500,
-    9 : 42500,
-    10 : 75000
+    # Easy-based Stage:
+    1 : 1200,
+    2 : 8500,
+    3 : 22500,
+    # Quadruple-based Stage:
+    4 : 44500,
+    5 : 115300,
+    6 : 145000,
+    7 : 215000,
+    # Madness-based Stage:
+    8 : 435000,
+    9 : 650500,
+    10 : 25000000
 }
 
 
@@ -165,15 +160,15 @@ prestige_costs = {
 autofarm_on = False
 autofarm_costs = {
     0 : 2500,
-    1 : 2750,
-    2 : 3000,
+    1 : 2500,
+    2 : 3250,
     3 : 3250,
-    4 : 3500,
-    5 : 3750,
-    6 : 4000,
-    7 : 4250,
-    8 : 4500,
-    9 : 4750,
+    4 : 4000,
+    5 : 4500,
+    6 : 5150,
+    7 : 6000,
+    8 : 7500,
+    9 : 8550,
 }
 
 
@@ -182,104 +177,133 @@ autofarm_costs = {
 easy_times_won = 0
 quadruple_times_won = 0
 madness_times_won = 0
-easy_times_won_multiplier = easy_times_won * 0.65 #prev 0.75
-quadruple_times_won_multiplier = quadruple_times_won * 3.75 #prev 1.15
-madness_times_won_multiplier = madness_times_won * 16.90 #prev 1.65
+easy_times_won_multiplier = easy_times_won * 0.15           # previously 0.75, 0.65
+quadruple_times_won_multiplier = quadruple_times_won * 4.00 # previously 1.15, 3.75
+madness_times_won_multiplier = madness_times_won * 22.00   # previously 1.65
 
 
 
-# Additional money upgrades:
-    # AMM_easy = 0.30x
-    # AMM_quadruple = 0.75x
-    # AMM_madness = 1.125x
-
-    # UPG0  -> $0.00
-    # UPG1  -> $60.00
-    # UPG2  -> $70.00
-    # UPG20 -> $250.00
-am_upgrade_level = 0
-additional_money_upgrade_value = 2.50 * am_upgrade_level 
-amu_costs = {
-    1 : 60.00,
-    2 : 70.00,
-    3 : 80.00,
-    4 : 90.00,
-    5 : 100.00,
-    6 : 110.00,
-    7 : 120.00,
-    8 : 130.00,
-    9 : 140.00,
-    10 : 150.00,
-    11 : 160.00,
-    12 : 170.00,
-    13 : 180.00,
-    14 : 190.00,
-    15 : 200.00,
-    16 : 210.00,
-    17 : 220.00,
-    18 : 230.00,
-    19 : 240.00,
-    20 : 250.00,
+# Extra Bucks Upgrade:
+    # eb_easy_multiplier        = 1.00x
+    # eb_quadruple_multiplier   = 15.00x
+    # eb_madness_mulitplier     = 35.00x
+eb_upgrade_level = 0
+extra_bucks_upgrade_value = 8.00 * eb_upgrade_level
+# {48.7*((x-1)**2) + 50:.2f}
+ebu_costs = {
+    # P0
+    1 : 50.00,   
+    2 : 98.70,
+    # P1
+    3 : 244.80, 
+    4 : 488.30,  
+    5 : 829.20,
+    # P2 
+    6 : 1267.50, 
+    7 : 1803.20, 
+    8 : 2436.30,
+    # P3
+    9 : 3166.80, 
+    10 : 3994.70,
+    11 : 4920.00,
+    12 : 5942.70,
+    # P4
+    13 : 7062.80,
+    14 : 8280.30,
+    15 : 9595.20,
+    # P5
+    16 : 11007.50,
+    17 : 12517.20,
+    18 : 14124.30,
+    # P6
+    19 : 15828.80,
+    20 : 17630.70,
+    21 : 19530.00,
+    # P7
+    22 : 21526.70,
+    23 : 23620.80,
+    24 : 25812.30,
+    # P8
+    25 : 28101.20,
+    26 : 30487.50,
+    27 : 32971.20,
+    28 : 35552.30,
+    # P9
+    29 : 38230.80,
+    30 : 41006.70,
 }
 
 
 
-# Loss Decrease Step:
-    # UPG0  -> 0
-    # UPG1  -> 1
-    # UPG10 -> 10
-loss_step_level = 0
-loss_step_level_factor = 1 - loss_step_level * 0.04
+# Loss Decrease:
+loss_stop_level = 0
+loss_stop_level_factor = 1 - loss_stop_level * 0.03
+# {12.7((x-1)**2) + 25:.2f}
 ls_costs = {
-    1 : 120.00,
-    2 : 155.00,
-    3 : 190.00,
-    4 : 225.00,
-    5 : 260.00,
-    6 : 295.00,
-    7 : 330.00,
-    8 : 365.00,
-    9 : 400.00,
-    10 : 435.00,
-    11 : 470.00,
-    12 : 505.00,
-    13 : 540.00,
-    14 : 575.00,
-    15 : 610.00,
-    16 : 645.00,
-    17 : 680.00,
-    18 : 715.00,
-    19 : 750.00,
-    20 : 785.00
+    1 : 25.00,
+    2 : 37.70,
+    3 : 75.80,
+    # P1
+    4 : 139.30,
+    5 : 228.20,
+    # P2
+    6 : 342.50,
+    7 : 330.20,
+    # P3
+    8 : 482.30,
+    9 : 837.80,
+    # P4
+    10 : 1053.70,
+    11 : 1295.00,
+    # P5
+    12 : 1561.70,
+    13 : 1853.80,
+    # P6
+    14 : 2171.30,
+    15 : 2514.20,
+    # P7
+    16 : 2882.50,
+    17 : 3276.20,
+    # P8
+    18 : 3695.30,
+    # P9
+    19 : 4139.80,
+    20 : 4609.70
 }
 
 
 
 # General Interval:
     # UPG0  -> 2.50s
-    # UPG1  -> 2.25s, $90.00
-    # UPG10 -> 0.25s, $315.00
+    # UPG1  -> 2.25s
+    # UPG10 -> 0.25s
 general_interval_level = 0
 general_interval_factor = 2.75 - (general_interval_level * 0.25)
+# {11.00((x-1)**2) + 55:.2f}
 gi_costs = {
-    1 : 90.00,
-    2 : 115.00,
-    3 : 140.00,
-    4 : 165.00,
-    5 : 190.00,
-    6 : 215.00,
-    7 : 240.00,
-    8 : 265.00,
-    9 : 290.00,
-    10 : 315.00
+    1 : 55.00,
+    2 : 66.00,
+    3 : 99.00,
+    4 : 154.00,
+    5 : 231.00,
+    6 : 330.00,
+    7 : 451.00,
+    8 : 594.00,
+    9 : 759.00,
+    10 : 946.00
 }
 
 
+
 def begin_tutorial():
+    # YET TO BE WRITTEN
     pass
 
 
 def show_balance(**kwargs):
+
+    global gambled_right
+    global slot_rolled
     
     if kwargs.get("just_won") == True:
         print(f"💲 Your new balance: ${user_balance:.2f} 💲\n\n")
@@ -287,17 +311,18 @@ def show_balance(**kwargs):
         slot_rolled.clear()
         time.sleep(1.00)
         os.system("cls")
+        return
+    
     else:
         os.system("cls")
         print(f"💖 Your balance: ${user_balance:.2f} 💸\n\n")
         time.sleep(1.00)
         os.system("cls")
-        main()
+        return
 
 
 def save_on_exit():
     save_data_to_savefile()
-    exit()
 
 
 def client_settings():
@@ -461,8 +486,8 @@ def save_data_to_savefile():
     global madness_times_won
 
     global general_interval_level
-    global loss_step_level 
-    global am_upgrade_level
+    global loss_stop_level 
+    global eb_upgrade_level
     
     global user_prestige_level
 
@@ -509,7 +534,7 @@ def save_data_to_savefile():
         autofarm_tosave = "0"
 
 
-    savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_step_level}\n{am_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}")
+    savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}")
 
     savefile.close()
 
@@ -528,11 +553,11 @@ def read_data_from_savefile():
     global general_interval_level
     global general_interval_factor
 
-    global loss_step_level
-    global loss_step_level_factor
+    global loss_stop_level
+    global loss_stop_level_factor
     
-    global am_upgrade_level
-    global additional_money_upgrade_value
+    global eb_upgrade_level
+    global extra_bucks_upgrade_value
     
     global user_prestige_level
 
@@ -563,11 +588,11 @@ def read_data_from_savefile():
         general_interval_level = int(line_values[4])
         general_interval_factor = 2.75 - (general_interval_level * 0.25)
 
-        loss_step_level = int(line_values[5])
-        loss_step_level_factor = 1 - loss_step_level * 0.04
+        loss_stop_level = int(line_values[5])
+        loss_stop_level_factor = 1 - loss_stop_level * 0.04
 
-        am_upgrade_level = int(line_values[6])
-        additional_money_upgrade_value = 2.50 * am_upgrade_level 
+        eb_upgrade_level = int(line_values[6])
+        extra_bucks_upgrade_value = 2.50 * eb_upgrade_level 
 
         user_prestige_level = int(line_values[7])
 
@@ -637,8 +662,9 @@ def recover_chance_sequence():
 
 
 def gameloss():
+    # When in the fuck will you encounter this? I don't even think you can legit lose the game unless you're at the very beginning and manage money poorly.
     os.system("cls")
-    print("\nFUCKING HELL! You're out of 💲💲💲, looks like you've lost. 👺\n\n")
+    print("\nFUCKING HELL!!!!! You're out of 💲💲💲, looks like you've lost. 👺\n\n")
     print("> If you still wish to continue playing from your last save, please reboot the game.")
     exit()
 
@@ -713,11 +739,11 @@ def display_upgrade_shop():
     global general_interval_level
     global general_interval_factor
 
-    global loss_step_level
-    global loss_step_level_factor
+    global loss_stop_level
+    global loss_stop_level_factor
     
-    global am_upgrade_level
-    global additional_money_upgrade_value
+    global eb_upgrade_level
+    global extra_bucks_upgrade_value
     
     global user_prestige_level
 
@@ -733,10 +759,10 @@ def display_upgrade_shop():
 
         print(f"⭐ UPGRADES ⭐")
         print(f"${user_balance:.2f}\n")
-        print(f"\t[1] = Raise Additional Win Funds [{am_upgrade_level}] : [+${additional_money_upgrade_value:.2f}] \t💸 -> [${amu_costs.get(am_upgrade_level+1):.2f}] : [+${additional_money_upgrade_value + 2.50:.2f}]\n", end="") if am_upgrade_level <= 19 else print(f"\t[1] = Raise Additional Win Funds [{am_upgrade_level}] : [+${additional_money_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
-        #print(f"\t[1] = Raise Additional Win Funds [{am_upgrade_level}] : [+${additional_money_upgrade_value:.2f}] \t💸 -> [${amu_costs.get(am_upgrade_level+1):.2f}] : [+${additional_money_upgrade_value + 2.50:.2f}]\n", end="")
-        print(f"\t[2] = Decrease Money Loss [{loss_step_level}] : [{loss_step_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_step_level+1):.2f}] : [{(loss_step_level_factor-0.04)*100:.2f}%]\n", end="") if loss_step_level <= 9 else print(f"\t[2] = Decrease Money Loss [{loss_step_level}] : [{loss_step_level_factor*100:.2f}%] \t\t📉 -> [MAXED] : [MAXED]\n", end="")
-        #print(f"\t[2] = Decrease Money Loss [{loss_step_level}] : [{loss_step_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_step_level+1):.2f}] : [{(loss_step_level_factor-0.04)*100:.2f}%]\n", end="")
+        print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${extra_bucks_upgrade_value + 8.00:.2f}]\n", end="") if eb_upgrade_level <= 29 else print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
+        #print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${extra_bucks_upgrade_value + 2.50:.2f}]\n", end="")
+        print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_stop_level+1):.2f}] : [{(loss_stop_level_factor-0.03)*100:.2f}%]\n", end="") if loss_stop_level <= 19 else print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [MAXED] : [MAXED]\n", end="")
+        #print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_stop_level+1):.2f}] : [{(loss_stop_level_factor-0.04)*100:.2f}%]\n", end="")
         print(f"\t[3] = Decrease General Interval [{general_interval_level}] : [{general_interval_factor:.2f}s] \t\t⌛ -> [${gi_costs.get(general_interval_level+1):.2f}] : [{general_interval_factor-0.25:.2f}s]\n", end="") if general_interval_level <= 9 else print(f"\t[3] = Decrease General Interval [{general_interval_level}] : [{general_interval_factor:.2f}s] \t\t⌛ -> [MAXED] : [MAXED]\n", end="")
         #print(f"\t[3] = Decrease General Interval [{general_interval_level}] : [{general_interval_factor:.2f}s] \t\t⌛ -> [${gi_costs.get(general_interval_level+1):.2f}] : [{general_interval_factor-0.25:.2f}s]\n", end="")
         print(f"\t[4] = Increase Difficulty Win Odds\t\t\t🏆")
@@ -745,18 +771,18 @@ def display_upgrade_shop():
         print(f"\t[7] = Return ⏪\n\n", end="")
         str_input = input()
 
-        # Additional Money Upgrade (AMU):
+        # Extra Bucks Upgrade (EBU):
         if str_input == "1":
-            if am_upgrade_level == 20:
-                print("❎ Your 'Additional Money Upgrade' has already been maxed!\n\tPress any key to return.")
+            if eb_upgrade_level == 30:
+                print("❎ Your 'Extra Bucks Upgrade' has already been maxed!\n\tPress any key to return.")
                 str_input = input()
                 return
             else:
-                if user_balance >= amu_costs.get(am_upgrade_level + 1):
+                if user_balance >= ebu_costs.get(eb_upgrade_level + 1):
                     print("🎇 Upgraded 'Bonus Money'! 🎇")
-                    user_balance -= amu_costs.get(am_upgrade_level + 1)
-                    am_upgrade_level += 1
-                    additional_money_upgrade_value = 2.50 * am_upgrade_level
+                    user_balance -= ebu_costs.get(eb_upgrade_level + 1)
+                    eb_upgrade_level += 1
+                    extra_bucks_upgrade_value = 2.50 * eb_upgrade_level
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
@@ -779,16 +805,16 @@ def display_upgrade_shop():
                     continue
         # Loss Stop Decrease (LSD):
         if str_input == "2":
-            if loss_step_level == 10:
+            if loss_stop_level == 20:
                 print("❎ Your 'Loss Stop Decrease' has already been maxed!\n\tPress any key to return.")
                 str_input = input()
                 return
             else:
-                if user_balance >= ls_costs.get(loss_step_level + 1):
+                if user_balance >= ls_costs.get(loss_stop_level + 1):
                     print("🎇 Upgraded 'Money Loss Decrease'! 🎇")
-                    user_balance -= ls_costs.get(loss_step_level + 1)
-                    loss_step_level += 1
-                    loss_step_level_factor = 1 - loss_step_level * 0.04
+                    user_balance -= ls_costs.get(loss_stop_level + 1)
+                    loss_stop_level += 1
+                    loss_stop_level_factor = 1 - loss_stop_level * 0.04
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
@@ -966,6 +992,7 @@ def display_upgrade_shop():
                                 str_input = input()
                                 if str_input.upper() == "Y":
                                     save_data_to_savefile()
+                                    return
                                 elif str_input.upper() == "N":
                                     return
                                 else:
@@ -998,8 +1025,8 @@ def display_upgrade_shop():
                 quadruple_times_won = 0
                 madness_times_won = 0
                 general_interval_level = 0
-                loss_step_level = 0
-                am_upgrade_level = 0
+                loss_stop_level = 0
+                eb_upgrade_level = 0
                 user_prestige_level += 1
                 easy_odds_upgrade_level = 0
                 quadruple_odds_upgrade_level = 0
@@ -1113,11 +1140,11 @@ def spin():
     global general_interval_level
     global general_interval_factor
 
-    global loss_step_level
-    global loss_step_level_factor
+    global loss_stop_level
+    global loss_stop_level_factor
     
-    global am_upgrade_level
-    global additional_money_upgrade_value
+    global eb_upgrade_level
+    global extra_bucks_upgrade_value
     
     global user_prestige_level
 
@@ -1126,14 +1153,14 @@ def spin():
 
 
     def get_user_input_with_timeout(timeout=0.75):
-        print("\n>>> ", end='', flush=True)  # Prompt for input
+        print("\n>>> ", end='', flush=True)
         start_time = time.time()
 
         while time.time() - start_time < timeout:
-            if msvcrt.kbhit():  # Check if a key was pressed
-                return msvcrt.getch().decode('utf-8')  # Read the input
+            if msvcrt.kbhit():
+                return msvcrt.getch().decode('utf-8')
 
-        print("\n\n⏳ Time's over!!")  # Timeout message
+        print("\n\n⏳ Time's over!!")
         return None
 
 
@@ -1206,13 +1233,13 @@ def spin():
                 gambled_right = 0
 
                 if slot_range == 3:
-                    user_balance -= 2.50 * loss_step_level_factor
+                    user_balance -= 2.50 * loss_stop_level_factor
 
                 elif slot_range == 4:
-                    user_balance -= 5.50 * loss_step_level_factor
+                    user_balance -= 6.75 * loss_stop_level_factor
 
                 elif slot_range == 5:
-                    user_balance -= 12.50 * loss_step_level_factor
+                    user_balance -= 12.50 * loss_stop_level_factor
 
                 else:
                     print(f"Gamemode variable: {game_mode} was corrupted during runtime. Check for grammatical spelling mistakes in the source code.")
@@ -1234,10 +1261,10 @@ def spin():
             print("🏆 You win! 🏆")
 
             if slot_range == 3:
-                earned_money = 135.00 * prestige_multipliers.get(user_prestige_level) + additional_money_upgrade_value + easy_times_won_multiplier
+                earned_money = (135.00 + (extra_bucks_upgrade_value * 1.00) + easy_times_won_multiplier) * prestige_multipliers.get(user_prestige_level)
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!")
                 easy_times_won += 1
-                easy_times_won_multiplier = easy_times_won * 0.75
+                easy_times_won_multiplier = easy_times_won * 0.15
                 user_balance += earned_money
                 time.sleep(general_interval_factor)
                 os.system("cls")
@@ -1245,10 +1272,10 @@ def spin():
                 time.sleep(1)
 
             elif slot_range == 4:
-                earned_money = 295.00 * prestige_multipliers.get(user_prestige_level) + additional_money_upgrade_value + quadruple_times_won_multiplier
+                earned_money = (615.00 + (extra_bucks_upgrade_value * 15.00) + quadruple_times_won_multiplier) * prestige_multipliers.get(user_prestige_level)
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!!")
                 quadruple_times_won += 1
-                quadruple_times_won_multiplier = quadruple_times_won * 1.15
+                quadruple_times_won_multiplier = quadruple_times_won * 4.00
                 user_balance += earned_money
                 time.sleep(general_interval_factor)
                 os.system("cls")
@@ -1256,10 +1283,10 @@ def spin():
                 time.sleep(1)
 
             elif slot_range == 5:
-                earned_money = 765.00 * prestige_multipliers.get(user_prestige_level) + additional_money_upgrade_value + madness_times_won_multiplier
+                earned_money = (2435.00 + (extra_bucks_upgrade_value * 35.00) + madness_times_won_multiplier) * prestige_multipliers.get(user_prestige_level)
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!!!")
                 madness_times_won += 1
-                madness_times_won_multiplier = madness_times_won * 1.65
+                madness_times_won_multiplier = madness_times_won * 22.00
                 user_balance += earned_money
                 time.sleep(general_interval_factor)
                 os.system("cls")
