@@ -13,20 +13,21 @@ from debug import *
 # I love making slightly advanced stuff out of pure garbage and silly ideas
 
 
-# YET TO IMPLEMENT:
-#   Tutorial Mode, granting the player a few extra bucks for the first upgrade,
-#   Unique messages after each prestige, informing the player what they've unlocked (it's just the multiplier, great game.),
-#   debuffs after certain stages in the game for specific difficulties,
-#   maybe add a switch bind option for the Y/N prompts, make the user have the ability to pick different keys.
+# GENERAL VARIABLES (be cautious):
+user_balance = 100.00
+slot_contents = ["🍪", "🍇", "🍄", "🍒", "🍍"]
+game_mode = "easy"
+slot_rolled = []
+slot_range = 3
+display_main_menu = True
+KEY_MINIGAME_PRIZE_MONEY = 1.70
+pref_removed_slot1 = None
+pref_removed_slot2 = None
+owns_autofarm = False
+acc_key = "Y"
+dec_key = "N"
 
-# NOTES FROM TESTING:
-#   infinite loop after buying autofarm.
-
-# NOTES FROM DURING THE ECONOMY REVAMP:
-#   I think loss decrease prices are ridiculous and unworth it,
-#   Make a user object, so it has its own balance and stuff,
-
-
+# ============== INFORMATION ==============
 
 # General cash rewards formulas:
     # Easy:
@@ -41,31 +42,31 @@ from debug import *
 
 
 
-# GENERAL WIN RATE STATISTICS AND INFORMATION:
-#   Math variables:
-#       a = amount of slot_contents
+# GENERAL WIN RATE STATISTICS AND EXPLANATIONS:
+#   Variables:
+#       a = amount of slot_contents (emojis available based on upgrade tier)
 #       s = amount of slots
 #   Formula:
 #       win_chance = (s(a^s))*100 %
 
 # Easy:
-#   Rules:  Hit 3 of the same elements, 5 contents => 5^3 = 125, 5/125 = 4.00%  #0
-#           Hit 3 of the same elements, 4 contents => 4^3 = 64, 4/64 = 6.25%    #1
-#           Hit 3 of the same elements, 3 contents => 3^3 = 9, 3/27 = 11.11%    #2
-#           Hit 3 of the same elements, 2 contents => 2^3 = 8, 2/8 = 25.00%     #3 // Unimplemented, too overpowered.
+#   Rules:  Hit 3, 5 total contents => 5^3 = 125, 5/125 = 4.00%  #0
+#           Hit 3, 4 total contents => 4^3 = 64, 4/64 = 6.25%    #1
+#           Hit 3, 3 total contents => 3^3 = 9, 3/27 = 11.11%    #2
+#           Hit 3, 2 total contents => 2^3 = 8, 2/8 = 25.00%     #3 // Unimplemented, too overpowered.
 # that looks freaking ridiculous, 25%?, maybe change the rewards for the games? absurd amounts!! what in the fuck? (i dont know what i've written here, i dont think i actually implemented that kinda buff)
 
 # Quadruple:
-#   Rules:  Hit 4 of the same elements, 5 contents => 5^4 = 625, 5/625 = 0.8000%
-#           Hit 4 of the same elements, 4 contents => 4^4 = 256, 4/256 = 1.5625%
-#           Hit 4 of the same elements, 3 contents => 3^4 = 81, 3/81 = 3.7037%
-#           Hit 4 of the same elements, 2 contents => 2^4 = 16, 2/16 = 12.5000% // Unimplemented, too overpowered.
+#   Rules:  Hit 4, 5 total contents => 5^4 = 625, 5/625 = 0.8000%
+#           Hit 4, 4 total contents => 4^4 = 256, 4/256 = 1.5625%
+#           Hit 4, 3 total contents => 3^4 = 81, 3/81 = 3.7037%
+#           Hit 4, 2 total contents => 2^4 = 16, 2/16 = 12.5000% // Unimplemented, too overpowered.
 
 # Madness:
-#   Rules:  Hit 5 of the same elements, 5 contents => 5^5 = 3125, 5/3125 = 0.16%
-#           Hit 5 of the same elements, 4 contents => 4^5 = 1024, 4/1024 = 0.39%
-#           Hit 5 of the same elements, 3 contents => 3^5 = 243, 3/243 = 1.23%
-#           Hit 5 of the same elements, 2 contents => 2^5 = 32, 2/32 = 6.25% // Unimplemented, too overpowered.
+#   Rules:  Hit 5, 5 total contents => 5^5 = 3125, 5/3125 = 0.16%
+#           Hit 5, 4 total contents => 4^5 = 1024, 4/1024 = 0.39%
+#           Hit 5, 3 total contents => 3^5 = 243, 3/243 = 1.23%
+#           Hit 5, 2 total contents => 2^5 = 32, 2/32 = 6.25% // Unimplemented, too overpowered.
 
 
 
@@ -88,6 +89,7 @@ madness_odds_display = {
     2 : 1.23
 }
 
+# (Costs)
 easy_odds_upgrades = {
     1 : 3501.00,
     2 : 75057.00
@@ -103,23 +105,7 @@ madness_odds_upgrades = {
 
 
 
-# GENERAL VARIABLES: (do not touch)
-user_balance = 100.00
-running = True
-slot_contents = ["🍪", "🍇", "🍄", "🍒", "🍍"]
-game_mode = "easy" # easy / quadruple / madness
-slot_rolled = []
-slot_range = 3
-display_main_menu = True
-keep_history = False # too lazy to implement or i just won't, VSC terminal is acting ridiculous when being expanded
-KEY_MINIGAME_PRIZE_MONEY = 1.70 # could do more, will see after testing if it's balanced out and not repetitive.
-pref_removed_slot1 = None
-pref_removed_slot2 = None
-owns_autofarm = False
-
-
-
-# Prestige Multipliers (+0.30x reward / prestige):
+# Prestige Multipliers (+0.30x reward per Prestige):
     # #1 - 1.30x reward
     # #2 - 1.60x reward
     # ...
@@ -145,8 +131,8 @@ prestige_costs = {
     2 : 8500,
     3 : 22500,
     # Quadruple-based Stage:
-    4 : 44500,
-    5 : 115300,
+    4 : 64500,
+    5 : 105300,
     6 : 145000,
     7 : 215000,
     # Madness-based Stage:
@@ -178,9 +164,9 @@ autofarm_costs = {
 easy_times_won = 0
 quadruple_times_won = 0
 madness_times_won = 0
-easy_times_won_multiplier = easy_times_won * 0.15           # previously 0.75, 0.65
-quadruple_times_won_multiplier = quadruple_times_won * 4.00 # previously 1.15, 3.75
-madness_times_won_multiplier = madness_times_won * 22.00    # previously 1.65
+easy_times_won_multiplier = easy_times_won * 1.00            # previously 0.75, 0.65
+quadruple_times_won_multiplier = quadruple_times_won * 22.00 # previously 1.15, 3.75
+madness_times_won_multiplier = madness_times_won * 955.00    # previously 1.65
 
 
 
@@ -189,7 +175,7 @@ madness_times_won_multiplier = madness_times_won * 22.00    # previously 1.65
     # eb_quadruple_multiplier   = 15.00x
     # eb_madness_mulitplier     = 35.00x
 eb_upgrade_level = 0
-extra_bucks_upgrade_value = (48.7*(eb_upgrade_level-1)**2) + 50 # ???
+extra_bucks_upgrade_value = (42.7*(eb_upgrade_level)**2)
 ebu_costs = {
     # P0
     1 : 50.00,   
@@ -236,9 +222,11 @@ ebu_costs = {
 
 
 # Loss Decrease:
+    # UPG0  -> 1.00 * game_cost 
+    # UPG1  -> 0.97 * game_cost
+    # UPG20 -> 0.40 * game_cost
 loss_stop_level = 0
 loss_stop_level_factor = 1 - loss_stop_level * 0.03
-# {12.7((x-1)**2) + 25:.2f}
 ls_costs = {
     1 : 25.00,
     2 : 37.70,
@@ -279,7 +267,6 @@ ls_costs = {
     # UPG10 -> 0.25s
 general_interval_level = 0
 general_interval_factor = 2.75 - (general_interval_level * 0.25)
-# {11.00((x-1)**2) + 55:.2f}
 gi_costs = {
     1 : 55.00,
     2 : 66.00,
@@ -295,9 +282,24 @@ gi_costs = {
 
 
 
-def begin_tutorial():
-    # YET TO BE WRITTEN
-    pass
+def begin_tutorial(skip_tuts=False):
+
+    if skip_tuts == True:
+        return
+    
+    os.system("cls")
+
+    str_input = input("👀 Hello! Welcome to my simple Python Slot Machine game.\n\nIn this game you spin the slot machine with a decent chance of winning\nbuy upgrades, autofarms and better odds for winning!\n\nPress Enter to continue!")
+    os.system("cls")
+    str_input = input("The chances for wins on each difficulty are following:\nEasy -> 4.00%\nQuadruple -> 0.80%\nMadness -> 0.16%\n\nYou can buy upgrades to make it easier!")
+    os.system("cls")
+    str_input = input("Your goal is to prestige every time you get a certain amount of cash\nand with every prestige you will gain some cash buffs so your game feels faster each time.")
+    os.system("cls")
+    str_input = input("Each game costs a bit of money 💸, so you will need to spend some cash in order to win more cash, got it?\nHere are the costs for each difficulty:\n\n🟢 Easy -> 2.50$\n🟡 Quadruple -> 6.75$\n🔴 Madness -> 12.50$\n\n")
+    os.system("cls")
+    str_input = input("🌟 You've got the basics now, get out there and show the world gambling's worth it!\nPress Enter to start..")
+
+    return
 
 
 def show_balance(**kwargs):
@@ -329,26 +331,28 @@ def client_settings():
     global pref_removed_slot1
     global pref_removed_slot2
 
+    global acc_key
+    global dec_key
+
     while True:
 
         os.system("cls")
         print("🥪 Client Settings 🌮\n")
-        str_input = input(f"\n💡 Pick an action:\n\n\t🔃 [1] -> Reset Savefile\n\t⭕ [2] -> Content Removal Preferences\n\t📝 [3] -> Save Game\n\t⏪ [4] -> Return\n\n")
+        str_input = input(f"\n💡 Pick an action:\n\n\t🔃 [1] -> Reset Savefile\n\t⭕ [2] -> Content Removal Preferences\n\t📝 [3] -> Save Game\n\t🆎 [4] -> Confirmation Binds\n\t⏪ [5] -> Return\n\n")
 
         if str_input.upper() == "1":
-
-            print("\n\nAre you sure ❓ This action cannot be undone. (Y/N)\n\n")
+            os.system("cls")
+            print(f"\n\nAre you sure ❓ This action cannot be undone. ({acc_key}/{dec_key})\n\n")
             str_input = input()
 
-            if str_input.upper() == "Y":
+            if str_input.upper() == acc_key:
 
-                print("\n\n⚠ Last warning 💢 There is no going back. (Y/N)\n\n")
+                print(f"\n\n⚠ Last warning 💢 There is no going back. {acc_key}/{dec_key})\n\n")
                 str_input = input()
 
-                if str_input.upper() == "Y":
+                if str_input.upper() == acc_key:
 
                     overwrite_savefile_with_default_data()
-                    exit()
 
                 else:
                     return   
@@ -438,7 +442,7 @@ def client_settings():
                         continue
 
             while True:
-                str_input = input("⭐ Awesome! Would you like to save your game? (Y/N): ")
+                str_input = input("⭐ Awesome! Would you like to save your game? ({acc_key}/{dec_key}): ")
 
                 if str_input.upper() == "Y":
                     save_data_to_savefile()
@@ -453,50 +457,101 @@ def client_settings():
 
         elif str_input.upper() == "3":
             save_data_to_savefile()
-            print(f"Data saved! Press any key to continue.")
+            print(f"Data saved! ✅ Press any key to continue.")
             str_input = input()
             return
 
         elif str_input.upper() == "4":
+            os.system("cls")
+            print("🔑 CHANGE CONFIRMATION KEYS 💫\n")
+            print("\tSwap out Y/N confirmation Keys to your liking\n\n")
+            print(f"> Currect preferences: {acc_key} / {dec_key}\n\n")
+            while True:
+                acc_key = str(input(">> Accept Key: ").upper())
+                dec_key = str(input(">> Decline Key: ").upper())
+                if (dec_key == "" or dec_key == None or acc_key == None or acc_key == ""):
+                    print("Empty keys? You must set them to something!")
+                    continue
+                if (dec_key == acc_key):
+                    print("You cannot have the same key bound to both accept and decline!")
+                    continue
+                
+                print("All set ✅ Have fun!")
+                return
+
+        elif str_input.upper() == "5":
             break
 
         else:
             print("❌ Invalid input!")
             time.sleep(1.0)
+            os.system("cls")
             continue
 
     return
 
 
 def overwrite_savefile_with_default_data():
+    global user_balance
+    global easy_times_won
+    global quadruple_times_won
+    global madness_times_won
+    global eb_upgrade_level
+    global loss_stop_level
+    global general_interval_level
+    global user_prestige_level
+    global easy_odds_upgrade_level
+    global quadruple_odds_upgrade_level
+    global madness_odds_upgrade_level
+    global pref_removed_slot1
+    global pref_removed_slot2
+    global owns_autofarm
+    global acc_key
+    global dec_key
+
+    global game_mode
+    global extra_bucks_upgrade_value
+    global loss_stop_level_factor
+    global general_interval_factor
+    global easy_times_won_multiplier
+    global quadruple_times_won_multiplier
+    global madness_times_won_multiplier
+    global autofarm_on
 
     with open("savefile.txt", "w") as savefile:
-        savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0")
-        savefile.close()
+        game_mode = "easy"
+        general_interval_level = 0
+        general_interval_factor = 2.75 * (general_interval_level * 0.25)
+        loss_stop_level = 0
+        loss_stop_level_factor = 1 - loss_stop_level * 0.03
+        eb_upgrade_level = 0
+        extra_bucks_upgrade_value = 48.7*(eb_upgrade_level)**2
+        easy_times_won = 0
+        quadruple_times_won = 0
+        madness_times_won = 0
+        easy_times_won_multiplier = easy_times_won * 1.00
+        quadruple_times_won_multiplier = quadruple_times_won * 22.00
+        madness_times_won_multiplier = madness_times_won * 955.00
+        owns_autofarm = False
+        user_prestige_level = 0
+        
+        easy_odds_upgrade_level = 0
+        quadruple_odds_upgrade_level = 0
+        madness_odds_upgrade_level = 0
+        user_balance = 100.00
+        autofarm_on = False
+        acc_key = "Y"
+        dec_key = "N"
+        pref_removed_slot1 = "🍪"
+        pref_removed_slot2 = "🍇"
+        savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN")
+        
+    savefile.close()
 
     return
 
 
 def save_data_to_savefile():
-    global user_balance
-    
-    global easy_times_won
-    global quadruple_times_won
-    global madness_times_won
-
-    global general_interval_level
-    global loss_stop_level 
-    global eb_upgrade_level
-    
-    global user_prestige_level
-
-    global easy_odds_upgrade_level
-    global quadruple_odds_upgrade_level
-    global madness_odds_upgrade_level
-
-    global owns_autofarm
-
-    savefile = open("savefile.txt", "w")
 
     # Handle emoji writing to .txt:
     match pref_removed_slot1:
@@ -532,8 +587,8 @@ def save_data_to_savefile():
     else:
         autofarm_tosave = "0"
 
-
-    savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}")
+    with open("savefile.txt", "w") as savefile:
+        savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}\n{acc_key}\n{dec_key}")
 
     savefile.close()
 
@@ -569,20 +624,23 @@ def read_data_from_savefile():
 
     global owns_autofarm
 
+    global acc_key
+    global dec_key
+
     with open("savefile.txt", "r") as savefile:
-        
+
         line_values = savefile.readlines()
 
         user_balance = float(line_values[0].strip())
 
         easy_times_won = int(line_values[1])
-        easy_times_won_multiplier = easy_times_won * 0.15
+        easy_times_won_multiplier = easy_times_won * 1.00
 
         quadruple_times_won = int(line_values[2])
-        quadruple_times_won_multiplier = quadruple_times_won * 4.00
+        quadruple_times_won_multiplier = quadruple_times_won * 22.00
 
         madness_times_won = int(line_values[3])
-        madness_times_won_multiplier = madness_times_won * 22.00
+        madness_times_won_multiplier = madness_times_won * 955.00
 
         general_interval_level = int(line_values[4])
         general_interval_factor = 2.75 - (general_interval_level * 0.25)
@@ -591,7 +649,7 @@ def read_data_from_savefile():
         loss_stop_level_factor = 1 - loss_stop_level * 0.03
 
         eb_upgrade_level = int(line_values[6])
-        extra_bucks_upgrade_value = (48.7*(eb_upgrade_level-1)**2) + 50
+        extra_bucks_upgrade_value = float(42.7*(eb_upgrade_level)**2)
 
         user_prestige_level = int(line_values[7])
 
@@ -611,7 +669,7 @@ def read_data_from_savefile():
             case "5":
                 pref_removed_slot1 = "🍄"
             case _:
-                print("ReadSavefile corrupted, at pref_emoji1, part malfunctioning. I recommend checking for errors in writesave()") 
+                print("read_data_from_savefile() malfunctioning, I recommend checking for index errors") 
         
         match line_values[12].strip():
             case "1":
@@ -625,12 +683,15 @@ def read_data_from_savefile():
             case "5":
                 pref_removed_slot2 = "🍄"
             case _:
-                print("ReadSavefile corrupted, at pref_emoji2, part malfunctioning. I recommend checking for errors in writesave()") 
+                print("read_data_from_savefile() malfunctioning, I recommend checking for index errors") 
 
         if line_values[13] == "1":
             owns_autofarm = True
         else:
             owns_autofarm = False
+
+        acc_key = str(line_values[14]).strip()
+        dec_key = str(line_values[15]).strip()
 
     savefile.close()
 
@@ -756,13 +817,24 @@ def display_upgrade_shop():
 
     global owns_autofarm
 
+    global easy_times_won_multiplier
+    global quadruple_times_won_multiplier
+    global madness_times_won_multiplier
+
+    global game_mode
+
+    global autofarm_on
+    
+    global acc_key
+    global dec_key
+
     while True:
 
         os.system("cls")
 
         print(f"⭐ UPGRADES ⭐")
         print(f"${user_balance:.2f}\n")
-        print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${(48.7*(eb_upgrade_level-1)**2) + 50:.2f}]\n", end="") if eb_upgrade_level <= 29 else print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
+        print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${(48.7*(eb_upgrade_level+1)**2):.2f}]\n", end="") if eb_upgrade_level <= 29 else print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
         #print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${extra_bucks_upgrade_value + 2.50:.2f}]\n", end="")
         print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_stop_level+1):.2f}] : [{(loss_stop_level_factor-0.03)*100:.2f}%]\n", end="") if loss_stop_level <= 19 else print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [MAXED] : [MAXED]\n", end="")
         #print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_stop_level+1):.2f}] : [{(loss_stop_level_factor-0.04)*100:.2f}%]\n", end="")
@@ -789,7 +861,7 @@ def display_upgrade_shop():
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
-                        print("📝 Would you like to save your game? (Y/N): ", end="")
+                        print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                         str_input = input()
                         if str_input.upper() == "Y":
                             save_data_to_savefile()
@@ -821,7 +893,7 @@ def display_upgrade_shop():
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
-                        print("📝 Would you like to save your game? (Y/N): ", end="")
+                        print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                         str_input = input()
                         if str_input.upper() == "Y":
                             os.system("cls")
@@ -853,7 +925,7 @@ def display_upgrade_shop():
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
-                        print("📝 Would you like to save your game? (Y/N): ", end="")
+                        print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                         str_input = input()
                         if str_input.upper() == "Y":
                             os.system("cls")
@@ -897,7 +969,7 @@ def display_upgrade_shop():
                             time.sleep(1.3)
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? (Y/N): ", end="")
+                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
                                 if str_input.upper() == "Y":
                                     save_data_to_savefile()
@@ -924,7 +996,7 @@ def display_upgrade_shop():
                             print("Upgraded! 🔥🔥")
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? (Y/N): ", end="")
+                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
                                 if str_input.upper() == "Y":
                                     save_data_to_savefile()
@@ -951,7 +1023,7 @@ def display_upgrade_shop():
                             time.sleep(1.3)
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? (Y/N): ", end="")
+                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
                                 if str_input.upper() == "Y":
                                     save_data_to_savefile()
@@ -982,7 +1054,7 @@ def display_upgrade_shop():
                     return
                 else:
                     while True:
-                        str_input = input("Would you like to purchase the Autofarm Ability module? (Y/N): ")
+                        str_input = input("Would you like to purchase the Autofarm Ability module? ({acc_key}/{dec_key}): ")
                         if str_input.upper() == "Y":
                             user_balance -= autofarm_costs.get(user_prestige_level)
                             owns_autofarm = True
@@ -991,7 +1063,7 @@ def display_upgrade_shop():
                             
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? (Y/N): ", end="")
+                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
                                 if str_input.upper() == "Y":
                                     save_data_to_savefile()
@@ -1019,30 +1091,49 @@ def display_upgrade_shop():
                 return
         # User Prestige:
         if str_input == "6":
+            if user_prestige_level == 10:
+                os.system("cls")
+                print("🌟 You've already reached the maximum prestige level! Congratulations!")
+                time.sleep(3.5)
+                return
+            
             if user_balance >= prestige_costs.get(user_prestige_level + 1):
 
                 while True:
     
                     os.system("cls")
-                    str_input = input("🌟 Are you sure you want to prestige? This action cannot be undone. (Y/N): ")
+                    str_input = input("🌟 Are you sure you want to prestige? This action cannot be undone. ({acc_key}/{dec_key}): ")
 
                     if str_input.upper() == "Y":
                         time.sleep(2.2)
                         os.system("cls")
                         print("😍 CONGRATULATIONS! You successfully prestiged! 😎")
-                        print(f"You're now prestige {user_prestige_level+1}! ... and gained x{1+(user_prestige_level*0.30):.2f} cash boost!!")
-                        user_balance = 100.00
+                        print(f"You're now prestige {user_prestige_level+1}! ... and gained x{1+((user_prestige_level+1)*0.30):.2f} cash boost!!")
+                        
+                        game_mode = "easy"
+                        general_interval_level = 0
+                        general_interval_factor = 2.75 * (general_interval_level * 0.25)
+                        loss_stop_level = 0
+                        loss_stop_level_factor = 1 - loss_stop_level * 0.03
+                        eb_upgrade_level = 0
+                        extra_bucks_upgrade_value = 48.7*(eb_upgrade_level)**2
                         easy_times_won = 0
                         quadruple_times_won = 0
                         madness_times_won = 0
-                        general_interval_level = 0
-                        loss_stop_level = 0
-                        eb_upgrade_level = 0
-                        user_prestige_level += 1
+                        easy_times_won_multiplier = easy_times_won * 1.00
+                        quadruple_times_won_multiplier = quadruple_times_won * 22.00
+                        madness_times_won_multiplier = madness_times_won * 955.00
+                        owns_autofarm = False
+                        user_prestige_level = 0
+                        
                         easy_odds_upgrade_level = 0
                         quadruple_odds_upgrade_level = 0
                         madness_odds_upgrade_level = 0
-                        owns_autofarm = 0
+                        user_balance = 100.00
+                        autofarm_on = False
+                        acc_key = "Y"
+                        dec_key = "N"
+
                         save_data_to_savefile()
                         time.sleep(6)
                         return
@@ -1102,7 +1193,7 @@ def change_game_settings():
                 os.system("cls")
                 break
             else:
-                print("Invalid Input.\n")
+                print("❌ Invalid Input.")
                 time.sleep(2)
                 os.system("cls")
                 continue
@@ -1110,7 +1201,7 @@ def change_game_settings():
             while True:
                 if owns_autofarm == True:
                     os.system("cls")
-                    str_input = input(f"\n💎 Would you like to enable Autofarm Module? (Y/N): ")
+                    str_input = input(f"\n💎 Would you like to enable Autofarm Module? ({acc_key}/{dec_key}): ")
 
                     if str_input.upper() == "Y":
                         autofarm_on = True
@@ -1362,12 +1453,11 @@ atexit.register(save_on_exit)                # Standard exit
 
 
 def main():
-    global running
     global display_main_menu
     global user_balance
     global game_mode
 
-    while running:
+    while True:
         
         # For unrepetitive sentences, misleading variable name, that should be "mainmenudisplay" countering the "spin again?" prompt:
         if display_main_menu:
@@ -1397,15 +1487,16 @@ def main():
                 print("💛 Have a nice day! 💸")
                 save_data_to_savefile()
                 exit()
+
             # elif str_input.upper() == "8":
             #     DEBUG_VARIABLEDUMP()
-            #       
-            #     str_input = input()
             #     continue
+
             # elif str_input.upper() == "9":
             #     DEBUG_ADDCASH()
             #     str_input = input("Added $1000.00, press to continue.")
             #     continue
+
             else:
                 print("❌ Invalid input.\n\n")
                 time.sleep(0.75)
@@ -1413,7 +1504,7 @@ def main():
                 continue
 
         else:
-            str_input = input(f"\n💯 Spin again? Y/N: ")
+            str_input = input(f"\n💯 Spin again? ({acc_key}/{dec_key}): ")
 
             if str_input.upper() == "Y":
                 game_setup()
@@ -1424,23 +1515,19 @@ def main():
                 continue
 
             else:
-                print("❌ Invalid input. (Y/N)\n\n")
+                print("❌ Invalid input. ({acc_key}/{dec_key})\n\n")
                 time.sleep(1)
                 os.system("cls")
 
 
 if __name__ == "__main__":
     try:
-        # Just check if such a file can be opened, I don't know what I've written here to be fair:
         with open("savefile.txt") as savefile:
-            savefile.close()
             pass
 
     except FileNotFoundError:
         overwrite_savefile_with_default_data()
         begin_tutorial()
-    
-    finally:
-        read_data_from_savefile()
 
+    read_data_from_savefile()
     main()

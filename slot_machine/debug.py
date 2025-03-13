@@ -9,7 +9,8 @@ def DEBUG_ADDCASH():
 def DEBUG_VARIABLEDUMP():
     globals_dump = globals()
     for var_name, value in globals_dump.items():
-        print(f"{var_name}: {value}")
+        print(f"{var_name}: {value}\n\n")
+    str_input = input(f"Dumped. Press enter to continue.")
 
 
 if __name__ == "__main__":

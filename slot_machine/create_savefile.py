@@ -17,7 +17,7 @@ with open("savefile.txt", "w") as savefile:
 # <madness_times_won>               [pos4](how many times on madness)
 
 # <eb_upgrade_level>                [pos7](bonus money for wins lvl)
-# <loss_step_level>                 [pos6](loss stop lvl)
+# <loss_stop_level>                 [pos6](loss stop lvl)
 # <general_interval_level>          [pos5](general interval decrease lvl)
 
 # <user_prestige_level>             [pos8](prestige lvl)
