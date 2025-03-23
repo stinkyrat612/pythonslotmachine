@@ -1,6 +1,6 @@
 # Create a starter savefile for testing, can be done via game menu:
 with open("savefile.txt", "w") as savefile:
-    savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN\n0\n0\n0")
+    savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN\n0\n0\n0\nFalse")
 
 # For emojis (at #12, #13):
     # "1" = grape
@@ -37,3 +37,5 @@ with open("savefile.txt", "w") as savefile:
 # <highest_win>                     [pos17](the most player has ever won from any difficulty)
 # <total_money_earned>              [pos18](total money earned overtime)
 # <total_money_spent>               [pos19](total money spent overtime)
+
+# <has_read_minigame_tut>           [pos20](user has read the minigame tutorial? False / True)

@@ -20,7 +20,7 @@ game_mode = "easy"
 slot_rolled = []
 slot_range = 3
 display_main_menu = True
-KEY_MINIGAME_PRIZE_MONEY = 2.65
+key_minigame_prize_money = (2.65 + (user_prestige_level * 1.6))
 pref_removed_slot1 = None
 pref_removed_slot2 = None
 owns_autofarm = False
@@ -29,6 +29,12 @@ dec_key = "N"
 highest_win = None 
 total_money_earned = None
 total_money_spent = None
+has_read_minigame_tut = False
+
+# OTHER VARIABLES (personalisation and debugging):
+skip_tuts = False
+
+# INITIALIZE PLAYER OBJECT:
 
 # ============== INFORMATION ==============
 
@@ -297,7 +303,7 @@ def view_statistics():
     input("Press Enter to return..")
 
 
-def begin_tutorial(skip_tuts=False):
+def begin_tutorial(skip_tuts):
     if skip_tuts:
         return
     
@@ -546,6 +552,7 @@ def overwrite_savefile_with_default_data():
     global quadruple_times_won_multiplier
     global madness_times_won_multiplier
     global autofarm_on
+    global has_read_minigame_tut
 
     with open("savefile.txt", "w") as savefile:
         game_mode = "easy"
@@ -554,7 +561,7 @@ def overwrite_savefile_with_default_data():
         loss_stop_level = 0
         loss_stop_level_factor = 1 - loss_stop_level * 0.03
         eb_upgrade_level = 0
-        extra_bucks_upgrade_value = 48.7*(eb_upgrade_level)**2
+        extra_bucks_upgrade_value = (42.7*(eb_upgrade_level)**2)
         easy_times_won = 0
         quadruple_times_won = 0
         madness_times_won = 0
@@ -573,7 +580,8 @@ def overwrite_savefile_with_default_data():
         dec_key = "N"
         pref_removed_slot1 = "🍪"
         pref_removed_slot2 = "🍇"
-        savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN\n0\n0\n0")
+        has_read_minigame_tut = False
+        savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN\n0\n0\n0\nFalse")
         
     savefile.close()
 
@@ -595,7 +603,7 @@ def save_data_to_savefile():
         case "🍄":
             prefslot1_tosave = "5"
         case _:
-            print("Savedata prefemoji1 variable corrupted (?), cannot save.")
+            print("Savedata prefemoji1 variable corrupted (?), either fucking way, cannot save.")
     
     match pref_removed_slot2:
         case "🍇":
@@ -609,15 +617,20 @@ def save_data_to_savefile():
         case "🍄":
             prefslot2_tosave = "5"
         case _:
-            print("Savedata prefemoji1 variable corrupted (?), cannot save.")
+            print("Savedata prefemoji1 variable corrupted (?), either fucking way, cannot save.")
 
     if owns_autofarm == True:
         autofarm_tosave = "1"
     else:
         autofarm_tosave = "0"
 
+    if has_read_minigame_tut == True:
+        has_read_minigame_tu_tosave = "True"
+    else:
+        has_read_minigame_tu_tosave = "False"
+
     with open("savefile.txt", "w") as savefile:
-        savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}\n{acc_key}\n{dec_key}\n{highest_win}\n{total_money_earned}\n{total_money_spent}")
+        savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}\n{acc_key}\n{dec_key}\n{highest_win}\n{total_money_earned}\n{total_money_spent}\n{has_read_minigame_tu_tosave}")
 
     savefile.close()
 
@@ -661,6 +674,10 @@ def read_data_from_savefile():
     global highest_win
     global total_money_earned
     global total_money_spent
+
+    global has_read_minigame_tut
+
+    global key_minigame_prize_money
 
     with open("savefile.txt", "r") as savefile:
 
@@ -732,6 +749,13 @@ def read_data_from_savefile():
         total_money_earned = float(line_values[17])
         total_money_spent = float(line_values[18])
 
+        if line_values[19].strip() == "False":
+            has_read_minigame_tut = False
+        else:
+            has_read_minigame_tut = True
+
+        key_minigame_prize_money = (2.65 + (user_prestige_level * 1.6))
+
     savefile.close()
 
     return
@@ -777,6 +801,8 @@ def gameloss():
 
     global line_values
     global user_balance
+
+    global total_money_earned
 
     os.system("cls")
 
@@ -829,6 +855,7 @@ def gameloss():
             time.sleep(2)
             
             input(f"$25.00 added back to your account! 💸\n\tPress Enter to continue...")
+            total_money_earned += 25.00
             user_balance += 25.00
             os.system("cls")
             time.sleep(2.5)
@@ -879,6 +906,11 @@ def init_key_minigame(**kwargs):
     global user_balance
     global KEY_MINIGAME_PRIZE_MONEY
 
+    global total_money_earned
+    global total_money_spent
+
+    global has_read_minigame_tut
+
     # Overall key-sequence game mechanic
     def get_user_input_with_timeout(timeout=3.0):
         user_input = [None]
@@ -897,7 +929,50 @@ def init_key_minigame(**kwargs):
         
         return user_input[0]
 
+    def pick_ran_keys():
+        keys = ("abcdefghijklmnopqrstuvwxyz")
+        picked_keys = [ran.choice(keys) for _ in range(5)]
+        return picked_keys
+
     os.system("cls")
+
+    if has_read_minigame_tut == False and kwargs.get("skip_tutorial") == False:
+        input("🧊 This here is a gamemode that lets you earn extra money if you type out all five characters (in order) right within a set timelimit.\nConsider it as a little minigame for some backup money.\n\nPress Enter to continue..")
+        os.system("cls")
+
+        print("Five random characters will appear on the screen now.. You gotta press enter after you type 'em out!")
+        time.sleep(5.0)
+        os.system("cls")
+
+        print("Ready?")
+        time.sleep(1.0)
+        os.system("cls")
+
+        print("Go!")
+        time.sleep(0.5)
+        os.system("cls")
+
+        while True:
+            tut_picked_keys = pick_ran_keys()
+            print("  ".join(tut_picked_keys).upper())
+
+            user_input = get_user_input_with_timeout(timeout=5.0)
+
+            if user_input == "Q":
+                return
+            elif user_input != None and list(user_input.lower()) == tut_picked_keys:
+                os.system("cls")
+                print("Perfect! Now try it out for actual rewards..")
+                has_read_minigame_tut = True
+                time.sleep(2.0)
+                break
+            else:
+                os.system("cls")
+                print("Dang.. You'll get better at this!\nIf you wish to quit, type Q in the minigame.")
+                time.sleep(2.5)
+                os.system("cls")
+                continue
+            
 
     print("🎭 Python Key-Sequence Game ✨")
     if kwargs.get("extra_money_sequence") or kwargs.get("about_to_lose"):
@@ -930,6 +1005,7 @@ def init_key_minigame(**kwargs):
         if kwargs.get("about_to_lose") or kwargs.get("extra_money_sequence"):
             time.sleep(2.0)
             os.system("cls")
+            total_money_earned += 15.00
             user_balance += 15.00
             print(f"💰 Amount of $10.00 has been added to your account!!")
             picked_keys.clear()
@@ -938,6 +1014,7 @@ def init_key_minigame(**kwargs):
         else:
             time.sleep(2.0)
             os.system("cls")
+            total_money_earned += KEY_MINIGAME_PRIZE_MONEY
             user_balance += KEY_MINIGAME_PRIZE_MONEY
             print(f"\t💰 Amount of ${KEY_MINIGAME_PRIZE_MONEY:.2f} has been added to your account!!")
             picked_keys.clear()
@@ -959,6 +1036,7 @@ def init_key_minigame(**kwargs):
             user_input = input()
             os.system("cls")
             user_balance -= 2.00
+            total_money_spent += 20
 
             if user_balance <= 2.50:
                 gameloss()
@@ -997,9 +1075,27 @@ def display_upgrade_shop():
     global game_mode
 
     global autofarm_on
-    
-    global acc_key
-    global dec_key
+
+    global total_money_earned
+    global total_money_spent
+
+    global key_minigame_prize_money
+
+    def save_prompt():
+        while True:
+            os.system("cls")
+            print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+            str_input = input()
+            if str_input.upper() == acc_key:
+                save_data_to_savefile()
+                os.system("cls")
+                return
+            elif str_input.upper() == dec_key:
+                return
+            else:
+                print("Please pick a valid option.")
+                time.sleep(1.5)
+                continue
 
     while True:
 
@@ -1007,7 +1103,7 @@ def display_upgrade_shop():
 
         print(f"⭐ UPGRADES ⭐")
         print(f"${user_balance:.2f}\n")
-        print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${(48.7*(eb_upgrade_level+1)**2):.2f}]\n", end="") if eb_upgrade_level <= 29 else print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
+        print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${(42.7*(eb_upgrade_level+1)**2):.2f}]\n", end="") if eb_upgrade_level <= 29 else print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [MAXED] : [MAXED]\n", end="")
         #print(f"\t[1] = Raise Additional Win Funds [{eb_upgrade_level}] : [+${extra_bucks_upgrade_value:.2f}] \t💸 -> [${ebu_costs.get(eb_upgrade_level+1):.2f}] : [+${extra_bucks_upgrade_value + 2.50:.2f}]\n", end="")
         print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_stop_level+1):.2f}] : [{(loss_stop_level_factor-0.03)*100:.2f}%]\n", end="") if loss_stop_level <= 19 else print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [MAXED] : [MAXED]\n", end="")
         #print(f"\t[2] = Decrease Money Loss [{loss_stop_level}] : [{loss_stop_level_factor*100:.2f}%] \t\t📉 -> [${ls_costs.get(loss_stop_level+1):.2f}] : [{(loss_stop_level_factor-0.04)*100:.2f}%]\n", end="")
@@ -1028,24 +1124,13 @@ def display_upgrade_shop():
             else:
                 if user_balance >= ebu_costs.get(eb_upgrade_level + 1):
                     print("🎇 Upgraded 'Bonus Money'! 🎇")
-                    user_balance -= ebu_costs.get(eb_upgrade_level + 1)
                     eb_upgrade_level += 1
-                    extra_bucks_upgrade_value = (48.7*(eb_upgrade_level-1)**2) + 50
+                    user_balance -= ebu_costs.get(eb_upgrade_level)
+                    total_money_spent += ebu_costs.get(eb_upgrade_level)
+                    extra_bucks_upgrade_value = (42.7*(eb_upgrade_level)**2)
                     time.sleep(1.5)
-                    while True:
-                        os.system("cls")
-                        print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                        str_input = input()
-                        if str_input.upper() == acc_key:
-                            save_data_to_savefile()
-                            os.system("cls")
-                            return    
-                        elif str_input.upper() == dec_key:
-                            return
-                        else:
-                            print("Please pick a valid option.")
-                            time.sleep(1.5)
-                            continue
+                    save_prompt()
+                    return
                 else:
                     print("❌ Not enough money. ❌")
                     time.sleep(1.5)
@@ -1059,25 +1144,13 @@ def display_upgrade_shop():
                 return
             else:
                 if user_balance >= ls_costs.get(loss_stop_level + 1):
-                    print("🎇 Upgraded 'Money Loss Decrease'! 🎇")
-                    user_balance -= ls_costs.get(loss_stop_level + 1)
                     loss_stop_level += 1
-                    loss_stop_level_factor = 1 - loss_stop_level * 0.04
+                    print("🎇 Upgraded 'Money Loss Decrease'! 🎇")
+                    user_balance -= ls_costs.get(loss_stop_level)
+                    total_money_spent += ls_costs.get(loss_stop_level)
+                    loss_stop_level_factor = 1 - loss_stop_level * 0.03
                     time.sleep(1.5)
-                    while True:
-                        os.system("cls")
-                        print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                        str_input = input()
-                        if str_input.upper() == acc_key:
-                            os.system("cls")
-                            save_data_to_savefile()
-                            return
-                        elif str_input.upper() == dec_key:
-                            return
-                        else:
-                            print("Please pick a valid option.")
-                            time.sleep(1.5)
-                            continue
+                    save_prompt()
                 else:
                     print("❌ Not enough money. ❌")
                     time.sleep(1.5)
@@ -1091,26 +1164,14 @@ def display_upgrade_shop():
                 return
             else:
                 if user_balance >= gi_costs.get(general_interval_level + 1):
-                    print("🎇 Upgraded 'General Interval Decrease'! 🎇")
-                    user_balance -= gi_costs.get(general_interval_level + 1)
                     general_interval_level += 1
+                    print("🎇 Upgraded 'General Interval Decrease'! 🎇") 
+                    user_balance -= gi_costs.get(general_interval_level)
+                    total_money_spent += gi_costs.get(general_interval_level)
                     general_interval_factor = 2.75 - (general_interval_level * 0.25)
                     time.sleep(1.5)
-                    while True:
-                        os.system("cls")
-                        print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                        str_input = input()
-                        if str_input.upper() == acc_key:
-                            os.system("cls")
-                            save_data_to_savefile()
-                            return
-                        elif str_input.upper() == dec_key:
-                            os.system("cls")
-                            return
-                        else:
-                            print("Please pick a valid option.")
-                            time.sleep(1.5)
-                            continue
+                    save_prompt()
+                    return
                 else:
                     print("❌ Not enough money. ❌")
                     time.sleep(1.5)
@@ -1136,23 +1197,13 @@ def display_upgrade_shop():
                         return
                     else:
                         if user_balance >= easy_odds_upgrades.get(easy_odds_upgrade_level+1):
-                            user_balance -= easy_odds_upgrades.get(easy_odds_upgrade_level+1)
                             easy_odds_upgrade_level += 1
                             print("Upgraded! 🔥")
-                            time.sleep(1.3)
-                            while True:
-                                os.system("cls")
-                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                                str_input = input()
-                                if str_input.upper() == acc_key:
-                                    save_data_to_savefile()
-                                    return
-                                elif str_input.upper() == dec_key:
-                                    return
-                                else:
-                                    print("Please pick a valid option.")
-                                    time.sleep(1.5)
-                                    continue
+                            user_balance -= easy_odds_upgrades.get(easy_odds_upgrade_level)
+                            total_money_spent += easy_odds_upgrades.get(easy_odds_upgrade_level)
+                            time.sleep(1.5)
+                            save_prompt()
+                            return
                         else:
                             print("❌ Not enough money!")
                             time.sleep(1.5)
@@ -1164,21 +1215,13 @@ def display_upgrade_shop():
                         return
                     else:
                         if user_balance >= quadruple_odds_upgrades.get(quadruple_odds_upgrade_level+1):
-                            user_balance -= quadruple_odds_upgrades.get(easy_odds_upgrade_level+1)
                             quadruple_odds_upgrade_level += 1
                             print("Upgraded! 🔥🔥")
-                            while True:
-                                os.system("cls")
-                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                                str_input = input()
-                                if str_input.upper() == acc_key:
-                                    save_data_to_savefile()
-                                elif str_input.upper() == dec_key:
-                                    return
-                                else:
-                                    print("Please pick a valid option.")
-                                    time.sleep(1.5)
-                                    continue
+                            user_balance -= quadruple_odds_upgrades.get(quadruple_odds_upgrade_level)
+                            total_money_spent += quadruple_odds_upgrades.get(quadruple_odds_upgrade_level)
+                            time.sleep(1.5)
+                            save_prompt()
+                            return
                         else:
                             print("❌ Not enough money!")
                             time.sleep(1.5)
@@ -1190,22 +1233,13 @@ def display_upgrade_shop():
                         return
                     else:
                         if user_balance >= madness_odds_upgrades.get(madness_odds_upgrade_level+1):
-                            user_balance -= madness_odds_upgrades.get(madness_odds_upgrade_level+1)
                             madness_odds_upgrade_level += 1
                             print("Upgraded! 🔥🔥🔥")
-                            time.sleep(1.3)
-                            while True:
-                                os.system("cls")
-                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                                str_input = input()
-                                if str_input.upper() == acc_key:
-                                    save_data_to_savefile()
-                                elif str_input.upper() == dec_key:
-                                    return
-                                else:
-                                    print("Please pick a valid option.")
-                                    time.sleep(1.5)
-                                    continue
+                            user_balance -= madness_odds_upgrades.get(madness_odds_upgrade_level)
+                            total_money_spent += madness_odds_upgrades.get(madness_odds_upgrade_level)
+                            time.sleep(1.5)
+                            save_prompt()
+                            return
                         else:
                             print("❌ Not enough money!")
                             time.sleep(1.5)
@@ -1234,19 +1268,8 @@ def display_upgrade_shop():
                             print("\nAutofarm purchased! Congratulations! 🎉🎉")
                             time.sleep(2.0)
                             
-                            while True:
-                                os.system("cls")
-                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
-                                str_input = input()
-                                if str_input.upper() == acc_key:
-                                    save_data_to_savefile()
-                                    return
-                                elif str_input.upper() == dec_key:
-                                    return
-                                else:
-                                    print("Please pick a valid option.")
-                                    time.sleep(1.5)
-                                    continue
+                            save_prompt()
+                            return
 
                         elif str_input.upper() == dec_key:
                             print(f"Returning...")
@@ -1289,7 +1312,7 @@ def display_upgrade_shop():
                         loss_stop_level = 0
                         loss_stop_level_factor = 1 - loss_stop_level * 0.03
                         eb_upgrade_level = 0
-                        extra_bucks_upgrade_value = 48.7*(eb_upgrade_level)**2
+                        extra_bucks_upgrade_value = (42.7*(eb_upgrade_level)**2)
                         easy_times_won = 0
                         quadruple_times_won = 0
                         madness_times_won = 0
@@ -1297,13 +1320,14 @@ def display_upgrade_shop():
                         quadruple_times_won_multiplier = quadruple_times_won * 22.00
                         madness_times_won_multiplier = madness_times_won * 955.00
                         owns_autofarm = False
-                        user_prestige_level = 0
+                        user_prestige_level += 1
                         
                         easy_odds_upgrade_level = 0
                         quadruple_odds_upgrade_level = 0
                         madness_odds_upgrade_level = 0
                         user_balance = 100.00
                         autofarm_on = False
+                        key_minigame_prize_money = (2.65 + (user_prestige_level * 1.6))
 
                         save_data_to_savefile()
                         time.sleep(6)
@@ -1560,7 +1584,7 @@ def spin():
 
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!")
                 easy_times_won += 1
-                easy_times_won_multiplier = easy_times_won * 0.15
+                easy_times_won_multiplier = easy_times_won * 1.00
                 user_balance += earned_money
                 time.sleep(general_interval_factor)
                 os.system("cls")
@@ -1577,7 +1601,7 @@ def spin():
 
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!!")
                 quadruple_times_won += 1
-                quadruple_times_won_multiplier = quadruple_times_won * 4.00
+                quadruple_times_won_multiplier = quadruple_times_won * 22.00
                 user_balance += earned_money
                 time.sleep(general_interval_factor)
                 os.system("cls")
@@ -1594,7 +1618,7 @@ def spin():
 
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!!!")
                 madness_times_won += 1
-                madness_times_won_multiplier = madness_times_won * 22.00
+                madness_times_won_multiplier = madness_times_won * 955.00
                 user_balance += earned_money
                 time.sleep(general_interval_factor)
                 os.system("cls")
@@ -1667,7 +1691,7 @@ def main():
                 game_setup()
             
             elif str_input.upper() == "2":
-                init_key_minigame()
+                init_key_minigame(skip_tutorial=skip_tuts)
                 
             elif str_input.upper() == "3":
                 display_upgrade_shop()
