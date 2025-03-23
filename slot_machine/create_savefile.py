@@ -1,6 +1,6 @@
 # Create a starter savefile for testing, can be done via game menu:
 with open("savefile.txt", "w") as savefile:
-    savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN")
+    savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN\n0\n0\n0")
 
 # For emojis (at #12, #13):
     # "1" = grape
@@ -33,3 +33,7 @@ with open("savefile.txt", "w") as savefile:
 
 # <acc_key>                         [pos15](accept key in the y/n prompts)
 # <dec_key>                         [pos16](decline key in the y/n prompts)
+
+# <highest_win>                     [pos17](the most player has ever won from any difficulty)
+# <total_money_earned>              [pos18](total money earned overtime)
+# <total_money_spent>               [pos19](total money spent overtime)

@@ -20,12 +20,15 @@ game_mode = "easy"
 slot_rolled = []
 slot_range = 3
 display_main_menu = True
-KEY_MINIGAME_PRIZE_MONEY = 1.70
+KEY_MINIGAME_PRIZE_MONEY = 2.65
 pref_removed_slot1 = None
 pref_removed_slot2 = None
 owns_autofarm = False
 acc_key = "Y"
 dec_key = "N"
+highest_win = None 
+total_money_earned = None
+total_money_spent = None
 
 # ============== INFORMATION ==============
 
@@ -281,23 +284,49 @@ gi_costs = {
 }
 
 
+def view_statistics():
+
+    os.system("cls")
+
+    print(f"🎭 PLAYER STATISTICS 🎭")
+    print(f"> Highest win: ${highest_win:.2f}")
+    print(f"> Times won: {easy_times_won+quadruple_times_won+madness_times_won}x")
+    print(f"> Money earned: ${total_money_earned:.2f}")
+    print(f"> Money spent: ${total_money_spent:.2f}\n\n")
+
+    input("Press Enter to return..")
+
 
 def begin_tutorial(skip_tuts=False):
-
-    if skip_tuts == True:
+    if skip_tuts:
         return
     
     os.system("cls")
+    
+    print("👀 Hello there!")
+    time.sleep(2)
+    os.system("cls")
+    
+    print("🎉 Welcome to the Python Slot Machine Game!")
+    time.sleep(3)
+    os.system("cls")
+    
+    input("Billy - your little brother - told you gambling's not worth it and if you want to become rich, you have to get a job and work a 9 to 5 job for the rest of your life.")
+    os.system("cls")
 
-    str_input = input("👀 Hello! Welcome to my simple Python Slot Machine game.\n\nIn this game you spin the slot machine with a decent chance of winning\nbuy upgrades, autofarms and better odds for winning!\n\nPress Enter to continue!")
+    input("Well..! In this game, you'll spin the slot machine with a decent chance of winning. Along the way, you can buy upgrades, unlock auto-farms and decrease intervals between 'em.\n\nPress Enter to continue...")
     os.system("cls")
-    str_input = input("The chances for wins on each difficulty are following:\nEasy -> 4.00%\nQuadruple -> 0.80%\nMadness -> 0.16%\n\nYou can buy upgrades to make it easier!")
+    
+    input("Here's a quick overview of the win chances for each difficulty:\n\n🟢 Easy: 4.00%\n🟡 Quadruple: 0.80%\n🔴 Madness: 0.16%\n\nDon't worry though – you can buy upgrades to improve your odds. Press Enter to continue...")
     os.system("cls")
-    str_input = input("Your goal is to prestige every time you get a certain amount of cash\nand with every prestige you will gain some cash buffs so your game feels faster each time.")
+    
+    input("Your ultimate goal is to prestige every time you accumulate enough cash up to Prestige #10. Each prestige will give you powerful buffs to help you progress faster in the game.\n\nPress Enter to continue...")
     os.system("cls")
-    str_input = input("Each game costs a bit of money 💸, so you will need to spend some cash in order to win more cash, got it?\nHere are the costs for each difficulty:\n\n🟢 Easy -> 2.50$\n🟡 Quadruple -> 6.75$\n🔴 Madness -> 12.50$\n\n")
+    
+    input("Each game costs a little bit of money to play, but with each spin, you’ll earn more cash! Here's the cost for each difficulty:\n\n🟢 Easy: $2.50\n🟡 Quadruple: $6.75\n🔴 Madness: $12.50\n\nPress Enter to continue...")
     os.system("cls")
-    str_input = input("🌟 You've got the basics now, get out there and show the world gambling's worth it!\nPress Enter to start..")
+    
+    input("🌟 Now that you know the basics, it's time to jump in and try your luck! Remember, with upgrades and strategy, you’ll get better over time. Press Enter to start the game and prove your little brother gambling's worth it... (at least in the game!)")
 
     return
 
@@ -347,7 +376,7 @@ def client_settings():
 
             if str_input.upper() == acc_key:
 
-                print(f"\n\n⚠ Last warning 💢 There is no going back. {acc_key}/{dec_key})\n\n")
+                print(f"\n\n⚠ Last warning 💢 There is no going back. ({acc_key}/{dec_key})\n\n")
                 str_input = input()
 
                 if str_input.upper() == acc_key:
@@ -442,12 +471,12 @@ def client_settings():
                         continue
 
             while True:
-                str_input = input("⭐ Awesome! Would you like to save your game? ({acc_key}/{dec_key}): ")
+                str_input = input(f"⭐ Awesome! Would you like to save your game? ({acc_key}/{dec_key}): ")
 
-                if str_input.upper() == "Y":
+                if str_input.upper() == acc_key:
                     save_data_to_savefile()
                     return
-                elif str_input.upper() == "N":
+                elif str_input.upper() == dec_key:
                     return
                 else:
                     print("❌ Please enter a valid input.")
@@ -544,7 +573,7 @@ def overwrite_savefile_with_default_data():
         dec_key = "N"
         pref_removed_slot1 = "🍪"
         pref_removed_slot2 = "🍇"
-        savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN")
+        savefile.write(f"100.00\n0\n0\n0\n0\n0\n0\n0\n0\n0\n0\n1\n2\n0\nY\nN\n0\n0\n0")
         
     savefile.close()
 
@@ -566,7 +595,7 @@ def save_data_to_savefile():
         case "🍄":
             prefslot1_tosave = "5"
         case _:
-            print("Savedata's prefemoji1 variable corrupted, cannot save.")
+            print("Savedata prefemoji1 variable corrupted (?), cannot save.")
     
     match pref_removed_slot2:
         case "🍇":
@@ -580,7 +609,7 @@ def save_data_to_savefile():
         case "🍄":
             prefslot2_tosave = "5"
         case _:
-            print("Savedata's prefemoji2 variable corrupted, cannot save.")
+            print("Savedata prefemoji1 variable corrupted (?), cannot save.")
 
     if owns_autofarm == True:
         autofarm_tosave = "1"
@@ -588,9 +617,11 @@ def save_data_to_savefile():
         autofarm_tosave = "0"
 
     with open("savefile.txt", "w") as savefile:
-        savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}\n{acc_key}\n{dec_key}")
+        savefile.write(f"{user_balance}\n{easy_times_won}\n{quadruple_times_won}\n{madness_times_won}\n{general_interval_level}\n{loss_stop_level}\n{eb_upgrade_level}\n{user_prestige_level}\n{easy_odds_upgrade_level}\n{quadruple_odds_upgrade_level}\n{madness_odds_upgrade_level}\n{prefslot1_tosave}\n{prefslot2_tosave}\n{autofarm_tosave}\n{acc_key}\n{dec_key}\n{highest_win}\n{total_money_earned}\n{total_money_spent}")
 
     savefile.close()
+
+    return
 
 
 def read_data_from_savefile():
@@ -626,6 +657,10 @@ def read_data_from_savefile():
 
     global acc_key
     global dec_key
+
+    global highest_win
+    global total_money_earned
+    global total_money_spent
 
     with open("savefile.txt", "r") as savefile:
 
@@ -693,48 +728,159 @@ def read_data_from_savefile():
         acc_key = str(line_values[14]).strip()
         dec_key = str(line_values[15]).strip()
 
+        highest_win = int(line_values[16])
+        total_money_earned = float(line_values[17])
+        total_money_spent = float(line_values[18])
+
     savefile.close()
+
+    return
 
 
 def recover_chance_sequence():
+
     os.system("cls")
-    print(f"Uh oh!")
+
+    print("Uh oh!")
     time.sleep(2.3)
     os.system("cls")
-    print(f"Looks like you've gambled it all away", end="")
-    
-    time.sleep(0.8)
+
+    print("Looks like you've gambled it all away", end="")
+    time.sleep(1.8)
     for x in range(4):
         print(".", end="", flush=True)
-        time.sleep(0.8)
+        time.sleep(1.8)
+    time.sleep(1.0)
+    os.system("cls")
 
-    time.sleep(1.8)
-    os.system("cls")
     print("But..!")
-    time.sleep(2.5)
+    time.sleep(2.0)
     os.system("cls")
+
     print("Luckily, we've got a chance for recovery just for you! Your beloved Key-Sequence game!")
     time.sleep(4.5)
     os.system("cls")
+
     print("Don't waste your chance!")
     time.sleep(0.8)
-    init_key_minigame(about_to_lose = True)
+    os.system("cls")
+
+    init_key_minigame(about_to_lose=True)
+    
+    if user_balance <= 0.00:
+        gameloss()
+    
+    return
 
 
 def gameloss():
-    # When in the fuck will you encounter this? I don't even think you can legit lose the game unless you're at the very beginning and manage money poorly.
-    os.system("cls")
-    print("\nFUCKING HELL!!!!! You're out of 💲💲💲, looks like you've lost. 👺\n\n")
-    print("> If you still wish to continue playing from your last save, please reboot the game.")
-    exit()
 
+    global line_values
+    global user_balance
+
+    os.system("cls")
+
+    if user_prestige_level <= 1:
+        print("FUCKING HELL!!!!! You're out of 💲💲💲!\n")
+        time.sleep(3)
+        os.system("cls")
+
+        for x in range(3):
+            print(".", end="", flush=True)
+            time.sleep(1.0)
+        os.system("cls")
+
+        print("Well..")  
+        time.sleep(1.5)
+        os.system("cls")
+
+        print("You've indeed proven gambling's not worth it.\n")
+        time.sleep(3.0)
+        os.system("cls")
+
+        print("Now nobody will know! ❌")
+        time.sleep(2.0)
+        os.system("cls")
+
+    else:
+        print("Fuck! What went wrong?")
+        time.sleep(2)
+        os.system("cls")
+
+        print("You're getting there! You can't give up now.")
+        time.sleep(1.5)
+        os.system("cls")
+
+    while True:
+
+        str_input = input(f"> Do you wish load your last save?\n\n[{acc_key}] = up to $75.00 backup money!\n[{dec_key}] = few extra bucks for when you try again\n\n")
+
+        if str_input.upper() == acc_key:
+
+            os.system("cls")
+            time.sleep(4.0)
+
+            print("Hey!")
+            time.sleep(1.3)
+            os.system("cls")
+
+            input("🌸 Your beloved grandma has found a few extra bucks in between the cushions for your addiction as your backup money!\n\tPress Enter to continue...")
+            os.system("cls")
+            time.sleep(2)
+            
+            input(f"$25.00 added back to your account! 💸\n\tPress Enter to continue...")
+            user_balance += 25.00
+            os.system("cls")
+            time.sleep(2.5)
+
+            input("Oh! Also, thanks for continuing! We'll let you play a few minigames with a greatly increased reward for some extra backup money.\n\tPress enter to continue...")
+            os.system("cls")
+
+            print("Ready?")
+            time.sleep(1.0)
+            os.system("cls")
+
+            print("Go!")
+            time.sleep(0.5)
+            os.system("cls")
+
+            count = 5
+            for x in range(5):
+                count -= 1
+                init_key_minigame(extra_money_sequence=True)
+                if count != 0:
+                    print(f"{count} more time(s)!")
+                input()
+                os.system("cls")
+                
+            print("🌟 Alright! That'd be it. Good luck now..")
+            time.sleep(3)
+            os.system("cls")
+
+            save_data_to_savefile()
+
+            return
+
+        elif str_input.upper() == dec_key:
+            os.system("cls")
+            print("Alright. Take a break - see you next time 💜")
+            user_balance += 25.00
+            exit()
+
+        else:
+            print("❌ Invalid input.\n\n")
+            time.sleep(0.75)
+            os.system("cls")
+            continue
+    
 
 def init_key_minigame(**kwargs):
+    # "about_to_lose" // "extra_money_sequence"
     global user_balance
     global KEY_MINIGAME_PRIZE_MONEY
 
-
-    def get_user_input_with_timeout(timeout=2.5):
+    # Overall key-sequence game mechanic
+    def get_user_input_with_timeout(timeout=3.0):
         user_input = [None]
 
         def read_input():
@@ -746,15 +892,17 @@ def init_key_minigame(**kwargs):
 
         if input_thread.is_alive():
             print("\n\n⏳ Time's over!!")
+            time.sleep(1.5)
             return None
         
         return user_input[0]
 
-
     os.system("cls")
 
     print("🎭 Python Key-Sequence Game ✨")
-    if kwargs.get("about_to_lose") != True:
+    if kwargs.get("extra_money_sequence") or kwargs.get("about_to_lose"):
+        print(f"\t💰 Prize: $15.00")
+    else:
         print(f"\t💰 Prize: ${KEY_MINIGAME_PRIZE_MONEY:.2f}")
 
     print("\n")
@@ -770,28 +918,53 @@ def init_key_minigame(**kwargs):
     # Read user input within the time limit
     user_input = get_user_input_with_timeout(2.5)
 
-    # Check if the input was correct, and if not then return
-    if user_input is None or list(user_input.lower()) != picked_keys:
-        print("❌ You've lost! 😭\nDouble-Press Enter to confirm...")
-        user_input = input()
-        os.system("cls")
-        picked_keys.clear()
-        user_balance -= 2.50
+    # print(f"Input: {user_input}, type: {type(user_input)}")
+    # print(f"Picked: {picked_keys}, type: {type(picked_keys)}")
+    # time.sleep(6)
 
-        if user_balance <= 2.50:
-            gameloss()
+    # Check if the input was correct, and if not then display a message
+    if user_input != None and list(user_input.lower()) == picked_keys:
+
+        # Win condition
+        print("\n\n🎉 Congrats! You've won the minigame!")
+        if kwargs.get("about_to_lose") or kwargs.get("extra_money_sequence"):
+            time.sleep(2.0)
+            os.system("cls")
+            user_balance += 15.00
+            print(f"💰 Amount of $10.00 has been added to your account!!")
+            picked_keys.clear()
+            return 
+            
         else:
+            time.sleep(2.0)
+            os.system("cls")
+            user_balance += KEY_MINIGAME_PRIZE_MONEY
+            print(f"\t💰 Amount of ${KEY_MINIGAME_PRIZE_MONEY:.2f} has been added to your account!!")
+            picked_keys.clear()
             return
-    
-    # Win condition
-    print("\n\n🎉 Congrats! You've won the minigame!")
-    print(f"\t💰 Amount of ${KEY_MINIGAME_PRIZE_MONEY:.2f} has been added to your account!!")
-    time.sleep(2.0)
-    os.system("cls")
-    picked_keys.clear()
-    user_balance += KEY_MINIGAME_PRIZE_MONEY
-    return
 
+    else:
+        # Regular message
+        if kwargs.get("extra_money_sequence"):
+            picked_keys.clear()
+            os.system("cls")
+            print("Catch it!")
+            time.sleep(2.4)
+            return
+        
+        # Loss condition message for special gamemodes
+        else:
+            print("❌ You've lost! 😭\n\tPress Enter to confirm...")
+            picked_keys.clear()
+            user_input = input()
+            os.system("cls")
+            user_balance -= 2.00
+
+            if user_balance <= 2.50:
+                gameloss()
+        
+        return
+    
 
 def display_upgrade_shop():
     global user_balance
@@ -863,11 +1036,11 @@ def display_upgrade_shop():
                         os.system("cls")
                         print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                         str_input = input()
-                        if str_input.upper() == "Y":
+                        if str_input.upper() == acc_key:
                             save_data_to_savefile()
                             os.system("cls")
                             return    
-                        elif str_input.upper() == "N":
+                        elif str_input.upper() == dec_key:
                             return
                         else:
                             print("Please pick a valid option.")
@@ -893,13 +1066,13 @@ def display_upgrade_shop():
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
-                        print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+                        print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                         str_input = input()
-                        if str_input.upper() == "Y":
+                        if str_input.upper() == acc_key:
                             os.system("cls")
                             save_data_to_savefile()
                             return
-                        elif str_input.upper() == "N":
+                        elif str_input.upper() == dec_key:
                             return
                         else:
                             print("Please pick a valid option.")
@@ -925,13 +1098,13 @@ def display_upgrade_shop():
                     time.sleep(1.5)
                     while True:
                         os.system("cls")
-                        print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+                        print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                         str_input = input()
-                        if str_input.upper() == "Y":
+                        if str_input.upper() == acc_key:
                             os.system("cls")
                             save_data_to_savefile()
                             return
-                        elif str_input.upper() == "N":
+                        elif str_input.upper() == dec_key:
                             os.system("cls")
                             return
                         else:
@@ -969,12 +1142,12 @@ def display_upgrade_shop():
                             time.sleep(1.3)
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
-                                if str_input.upper() == "Y":
+                                if str_input.upper() == acc_key:
                                     save_data_to_savefile()
                                     return
-                                elif str_input.upper() == "N":
+                                elif str_input.upper() == dec_key:
                                     return
                                 else:
                                     print("Please pick a valid option.")
@@ -996,11 +1169,11 @@ def display_upgrade_shop():
                             print("Upgraded! 🔥🔥")
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
-                                if str_input.upper() == "Y":
+                                if str_input.upper() == acc_key:
                                     save_data_to_savefile()
-                                elif str_input.upper() == "N":
+                                elif str_input.upper() == dec_key:
                                     return
                                 else:
                                     print("Please pick a valid option.")
@@ -1023,11 +1196,11 @@ def display_upgrade_shop():
                             time.sleep(1.3)
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
-                                if str_input.upper() == "Y":
+                                if str_input.upper() == acc_key:
                                     save_data_to_savefile()
-                                elif str_input.upper() == "N":
+                                elif str_input.upper() == dec_key:
                                     return
                                 else:
                                     print("Please pick a valid option.")
@@ -1054,8 +1227,8 @@ def display_upgrade_shop():
                     return
                 else:
                     while True:
-                        str_input = input("Would you like to purchase the Autofarm Ability module? ({acc_key}/{dec_key}): ")
-                        if str_input.upper() == "Y":
+                        str_input = input(f"Would you like to purchase the Autofarm Ability module? ({acc_key}/{dec_key}): ")
+                        if str_input.upper() == acc_key:
                             user_balance -= autofarm_costs.get(user_prestige_level)
                             owns_autofarm = True
                             print("\nAutofarm purchased! Congratulations! 🎉🎉")
@@ -1063,19 +1236,19 @@ def display_upgrade_shop():
                             
                             while True:
                                 os.system("cls")
-                                print("📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
+                                print(f"📝 Would you like to save your game? ({acc_key}/{dec_key}): ", end="")
                                 str_input = input()
-                                if str_input.upper() == "Y":
+                                if str_input.upper() == acc_key:
                                     save_data_to_savefile()
                                     return
-                                elif str_input.upper() == "N":
+                                elif str_input.upper() == dec_key:
                                     return
                                 else:
                                     print("Please pick a valid option.")
                                     time.sleep(1.5)
                                     continue
 
-                        elif str_input.upper() == "N":
+                        elif str_input.upper() == dec_key:
                             print(f"Returning...")
                             time.sleep(1.0)
                             return
@@ -1102,9 +1275,9 @@ def display_upgrade_shop():
                 while True:
     
                     os.system("cls")
-                    str_input = input("🌟 Are you sure you want to prestige? This action cannot be undone. ({acc_key}/{dec_key}): ")
+                    str_input = input(f"🌟 Are you sure you want to prestige? This action cannot be undone. ({acc_key}/{dec_key}): ")
 
-                    if str_input.upper() == "Y":
+                    if str_input.upper() == acc_key:
                         time.sleep(2.2)
                         os.system("cls")
                         print("😍 CONGRATULATIONS! You successfully prestiged! 😎")
@@ -1131,14 +1304,12 @@ def display_upgrade_shop():
                         madness_odds_upgrade_level = 0
                         user_balance = 100.00
                         autofarm_on = False
-                        acc_key = "Y"
-                        dec_key = "N"
 
                         save_data_to_savefile()
                         time.sleep(6)
                         return
                     
-                    elif str_input.upper() == "N":
+                    elif str_input.upper() == dec_key:
                         return
                     
                     else:
@@ -1203,12 +1374,12 @@ def change_game_settings():
                     os.system("cls")
                     str_input = input(f"\n💎 Would you like to enable Autofarm Module? ({acc_key}/{dec_key}): ")
 
-                    if str_input.upper() == "Y":
+                    if str_input.upper() == acc_key:
                         autofarm_on = True
                         print("\n✅ Autofarm ENABLED!!!")
                         time.sleep(1.2)
                         return
-                    elif str_input.upper() == "N":
+                    elif str_input.upper() == dec_key:
                         autofarm_on = False
                         print("\n❌ Autofarm DISABLED!")
                         time.sleep(0.5)
@@ -1261,6 +1432,9 @@ def spin():
     global owns_autofarm
     global autofarm_on
 
+    global highest_win
+    global total_money_earned
+    global total_money_spent
 
     def get_user_input_with_timeout(timeout=0.75):
         print("\n>>> ", end='', flush=True)
@@ -1269,8 +1443,7 @@ def spin():
         while time.time() - start_time < timeout:
             if msvcrt.kbhit():
                 return msvcrt.getch().decode('utf-8')
-
-        print("\n\n⏳ Time's over!!")
+            
         return None
 
 
@@ -1343,19 +1516,26 @@ def spin():
                 gambled_right = 0
 
                 if slot_range == 3:
-                    user_balance -= 2.50 * loss_stop_level_factor
+                    money_lost = 2.50 * loss_stop_level_factor
+                    total_money_spent += money_lost
+                    user_balance -= money_lost
 
                 elif slot_range == 4:
-                    user_balance -= 6.75 * loss_stop_level_factor
+                    money_lost = 6.75 * loss_stop_level_factor
+                    total_money_spent += money_lost
+                    user_balance -= money_lost
 
                 elif slot_range == 5:
-                    user_balance -= 12.50 * loss_stop_level_factor
+                    money_lost = 12.50 * loss_stop_level_factor
+                    total_money_spent += money_lost
+                    user_balance -= money_lost
 
                 else:
-                    print(f"Gamemode variable: {game_mode} was corrupted during runtime. Check for grammatical spelling mistakes in the source code.")
+                    print(f"'gamemode' var: {game_mode} of type {type(game_mode)} was corrupted during runtime. Check for grammatical mistakes or something. fuck? how could this even come?")
 
                 print(f"Loser! Better luck next time. Balance: ${user_balance:.2f}")
 
+                # Recover chance sequence condition, 80% for an extra game to gain back a few bucks:
                 if user_balance <= 0.00:
                     time.sleep(4)
                     can_roll = ran.randint(0, 100)
@@ -1372,6 +1552,12 @@ def spin():
 
             if slot_range == 3:
                 earned_money = (135.00 + (extra_bucks_upgrade_value * 1.00) + easy_times_won_multiplier) * prestige_multipliers.get(user_prestige_level)
+
+                if earned_money > highest_win:
+                    highest_win = earned_money
+
+                total_money_earned += earned_money
+
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!")
                 easy_times_won += 1
                 easy_times_won_multiplier = easy_times_won * 0.15
@@ -1383,6 +1569,12 @@ def spin():
 
             elif slot_range == 4:
                 earned_money = (615.00 + (extra_bucks_upgrade_value * 15.00) + quadruple_times_won_multiplier) * prestige_multipliers.get(user_prestige_level)
+                
+                if earned_money > highest_win:
+                    highest_win = earned_money
+                
+                total_money_earned += earned_money
+
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!!")
                 quadruple_times_won += 1
                 quadruple_times_won_multiplier = quadruple_times_won * 4.00
@@ -1394,6 +1586,12 @@ def spin():
 
             elif slot_range == 5:
                 earned_money = (2435.00 + (extra_bucks_upgrade_value * 35.00) + madness_times_won_multiplier) * prestige_multipliers.get(user_prestige_level)
+                
+                if earned_money > highest_win:
+                    highest_win = earned_money
+                
+                total_money_earned += earned_money
+
                 print(f"Amount of ${earned_money:.2f} has been added to your balance!!!")
                 madness_times_won += 1
                 madness_times_won_multiplier = madness_times_won * 22.00
@@ -1462,14 +1660,14 @@ def main():
         # For unrepetitive sentences, misleading variable name, that should be "mainmenudisplay" countering the "spin again?" prompt:
         if display_main_menu:
             os.system("cls")
-            print("\n⭐ Python Slot Machine ⭐\n")
-            str_input = input(f"\n💡 Pick an action:\n\n\t🌟 [1] -> Play\n\t🏓 [2] -> Minigame\n\t😎 [3] -> Upgrade\n\t👿 [4] -> Difficulty & Modules\n\t💵 [5] -> Balance\n\t🍏 [6] -> Saving & Settings\n\t⏪ [7] -> Exit\n\n")
+            print("⭐ Python Slot Machine ⭐\n")
+            str_input = input(f"\n💡 Pick an action:\n\n\t🌟 [1] -> Play\n\t🏓 [2] -> Minigame\n\t😎 [3] -> Upgrade\n\t👿 [4] -> Difficulty & Modules\n\t💵 [5] -> Balance\n\t🍏 [6] -> Saving & Settings\n\t🏆 [7] -> Statistics\n\t⏪ [8] -> Exit\n\n")
 
             if str_input.upper() == "1":
                 game_setup()
             
             elif str_input.upper() == "2":
-                init_key_minigame(about_to_lose = False)
+                init_key_minigame()
                 
             elif str_input.upper() == "3":
                 display_upgrade_shop()
@@ -1484,18 +1682,24 @@ def main():
                 client_settings()
 
             elif str_input.upper() == "7":
+                view_statistics()
+
+            elif str_input.upper() == "8":
                 print("💛 Have a nice day! 💸")
                 save_data_to_savefile()
                 exit()
 
-            # elif str_input.upper() == "8":
-            #     DEBUG_VARIABLEDUMP()
-            #     continue
+            #elif str_input.upper() == "9":
+                def DEBUG_VARIABLEDUMP():
+                    globals_dump = globals()
+                    for var_name, value in globals_dump.items():
+                        print(f"{var_name}: {value}\n\n")
+                    str_input = input(f"Dumped. Press Enter to continue.")
 
-            # elif str_input.upper() == "9":
-            #     DEBUG_ADDCASH()
-            #     str_input = input("Added $1000.00, press to continue.")
-            #     continue
+            #elif str_input.upper() == "0":
+                DEBUG_ADDCASH()
+                str_input = input("Added $1000.00, Press Enter to continue.")
+                continue
 
             else:
                 print("❌ Invalid input.\n\n")
@@ -1506,16 +1710,16 @@ def main():
         else:
             str_input = input(f"\n💯 Spin again? ({acc_key}/{dec_key}): ")
 
-            if str_input.upper() == "Y":
+            if str_input.upper() == acc_key:
                 game_setup()
 
-            elif str_input.upper() == "N":
+            elif str_input.upper() == dec_key:
                 display_main_menu = True
                 os.system("cls")
                 continue
 
             else:
-                print("❌ Invalid input. ({acc_key}/{dec_key})\n\n")
+                print(f"❌ Invalid input. ({acc_key}/{dec_key})\n\n")
                 time.sleep(1)
                 os.system("cls")
 
